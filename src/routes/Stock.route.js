@@ -1,8 +1,10 @@
-const StockController = require("../controllers/Stock.controller.js");
 const { Router } = require("express");
+const {
+    getClosingToDate
+} = require("../controllers/Stock.controller.js");
 
 const stockRoute = Router();
 
-stockRoute.get('/', StockController.getClosingStockToDate);
+stockRoute.get('/closing', getClosingToDate);
 
 module.exports = stockRoute;

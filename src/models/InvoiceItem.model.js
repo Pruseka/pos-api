@@ -44,6 +44,8 @@ const InvoiceItem = db.define('InvoiceItem', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     }
+}, {
+    updatedAt: false,
 });
 
 Invoice.hasMany(InvoiceItem, {

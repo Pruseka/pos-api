@@ -37,6 +37,8 @@ const TransferItem = db.define('TransferItem', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+}, {
+    updatedAt: false,
 });
 
 User.hasMany(TransferItem, {
@@ -50,6 +52,12 @@ Transfer.hasMany(TransferItem, {
         name: 'transferId'
     }
 });
+
+TransferItem.belongsTo(User, {
+    foreignKey: {
+        name: 'userId'
+    }
+})
 
 TransferItem.belongsTo(Item, {
     foreignKey: {

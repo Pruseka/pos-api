@@ -37,6 +37,8 @@ const CustomerTransferItem = db.define('CustomerTransferItem', {
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
+}, {
+    updatedAt: false,
 });
 
 Customer.hasMany(CustomerTransferItem, {

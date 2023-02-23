@@ -1,21 +1,12 @@
-const TransferItemService = require('../services/TransferItem.service');
-const InvoiceItemService = require("../services/InvoiceItem.service");
-const UserService = require('../services/User.service');
+const SupplyItemService = require("../services/SupplyItem.service");
+const TransferItemService = require('../services/TransferItem.service')
 const ItemService = require("../services/Item.service.js");
 
-const StockValidator = require("../validators/Stock.validator.js");
-
-const {
-    USER_NOT_EXIST,
-} = require('../configs/message.config');
+const WarehouseValidator = require("../validators/Warehouse.validator");
 
 const {
     successRes
 } = require("../utils/response.utils.js");
-
-const {
-    BadRequestError
-} = require('../configs/constant.config');
 
 const createItemMap = (items) => {
     const itemMap = new Map();
@@ -27,28 +18,24 @@ const createItemMap = (items) => {
 
 const getClosingToDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getToDateValidator.validate(req.query);
+        const validation = WarehouseValidator.getToDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         };
-        const { to, userId } = validation.value;
-        const user = await UserService.getUserById(userId);
-        if (!user) {
-            throw createError(BadRequestError, USER_NOT_EXIST);
-        }
+        const { to } = validation.value;
         const toDate = new Date(to);
         const _items = await ItemService.getAllItems();
-        const tranferItems = await TransferItemService.getTransferItemsToDateByUserId(toDate, userId);
-        const invoiceItems = await InvoiceItemService.getInvoiceItemsToDate(toDate);
-        const transferItemMap = createItemMap(tranferItems);
-        const invoiceItemMap = createItemMap(invoiceItems);
+        const supplyItems = await SupplyItemService.getSupplyItemsToDate(toDate);
+        const transferItems = await TransferItemService.getTransferItemsToDate(toDate);
+        const transferItemMap = createItemMap(transferItems);
+        const supplyItemMap = createItemMap(supplyItems);
         const items = _items.map(item => {
-            const invoiceQty = invoiceItemMap.get(item.itemId) ?? 0;
             const transferQty = transferItemMap.get(item.itemId) ?? 0;
+            const supplyQty = supplyItemMap.get(item.itemId) ?? 0;
             return {
                 itemId: item.itemId,
                 name: item.name,
-                qty: transferQty - invoiceQty
+                qty: supplyQty - transferQty
             };
         });
         successRes(res, null, items);
@@ -63,7 +50,7 @@ const getInRecordByDate = async (req, res, next) => {
         if (validation.error) {
             throw validation.error;
         }
-        const { from, to, userId } = validation.value;
+        const { from, to } = validation.value;
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const _supplyItems = await SupplyItemService.getSupplyItemsByDate(fromDate, toDate);
@@ -87,7 +74,7 @@ const getOutRecordByDate = async (req, res, next) => {
         if (validation.error) {
             throw validation.error;
         }
-        const { from, to, userId } = validation.value;
+        const { from, to } = validation.value;
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const _transferItems = await TransferItemService.getTransferItemsByDate(fromDate, toDate);
@@ -107,4 +94,6 @@ const getOutRecordByDate = async (req, res, next) => {
 
 module.exports = Object.freeze({
     getClosingToDate,
+    getInRecordByDate,
+    getOutRecordByDate,
 })

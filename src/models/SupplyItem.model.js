@@ -55,6 +55,12 @@ Supply.hasMany(SupplyItem, {
     }
 });
 
+SupplyItem.belongsTo(Supply, {
+    foreignKey: {
+        name: 'supplyId'
+    }
+})
+
 SupplyItem.belongsTo(Item, {
     foreignKey: {
         name: 'itemId'

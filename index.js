@@ -22,6 +22,7 @@ const transferRoute = require('./src/routes/Transfer.route');
 const customerTransferRoute = require('./src/routes/CustomerTransfer.route');
 const warehouseRoute = require('./src/routes/Warehouse.route');
 const stockRoute = require('./src/routes/Stock.route');
+const userRoute = require('./src/routes/User.route');
 
 const {
     ADMIN,
@@ -47,6 +48,7 @@ app.use('/api/transfer', authHandler([ADMIN, SALESMAN]), transferRoute);
 app.use('/api/customer_transfer', authHandler([ADMIN, SALESMAN]), customerTransferRoute);
 app.use('/api/warehouse', authHandler([ADMIN, SALESMAN]), warehouseRoute);
 app.use('/api/stock', authHandler([ADMIN, SALESMAN]), stockRoute);
+app.use('/api/user', authHandler([ADMIN]), userRoute);
 
 app.use('/api/expense', authHandler([ADMIN]), expenseRoute);
 

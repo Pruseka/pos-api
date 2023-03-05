@@ -79,7 +79,7 @@ const getOutRecordByDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _transferItems = await TransferItemService.getTransferItemsByDate(fromDate, toDate);
         const transferItems = _transferItems.map(_transferItem => {
-            const { User, Item, userId, price, amount, ...transferItem } = _transferItem.get({ plain: true });
+            const { User, Item, userId, ...transferItem } = _transferItem.get({ plain: true });
             return {
                 user: User.name,
                 name: Item.name,

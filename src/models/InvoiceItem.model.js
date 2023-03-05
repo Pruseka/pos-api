@@ -54,6 +54,12 @@ Invoice.hasMany(InvoiceItem, {
     }
 });
 
+InvoiceItem.belongsTo(Invoice, {
+    foreignKey: {
+        name: 'invoiceId'
+    }
+})
+
 InvoiceItem.belongsTo(Item, {
     foreignKey: {
         name: 'itemId'

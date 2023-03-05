@@ -1,5 +1,7 @@
 const { fn, Op, literal } = require("sequelize");
 
+const Invoice = require("../models/Invoice.model.js");
+const Item = require('../models/Item.model');
 const InvoiceItem = require("../models/InvoiceItem.model.js");
 
 const addAllInvoiceItems = async (invoiceItems) => {
@@ -49,9 +51,36 @@ const getInvoiceItemsToDateByUserId = async (toDate, userId) => {
     });
 }
 
+const getInvoiceItemsByDateAndUserId = async(fromDate, toDate, userId) => {
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await InvoiceItem.findAll({
+        where: {
+            createdAt: {
+                [Op.gte]: fromDate,
+                [Op.lt]: temp,
+            },
+        },
+        include: [
+            {
+                model: Invoice,
+                where: {
+                    createdBy: userId
+                },
+                attributes: ['customer']
+            },
+            {
+                model: Item,
+                attributes: ['name']
+            }
+        ],
+    });
+}
+
 
 module.exports = Object.freeze({
     addAllInvoiceItems,
     getInvoiceItemsToDate,
     getInvoiceItemsToDateByUserId,
+    getInvoiceItemsByDateAndUserId,
 })

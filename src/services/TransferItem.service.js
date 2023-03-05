@@ -31,6 +31,26 @@ const getTransferItemsByDate = async (fromDate, toDate) => {
     })
 }
 
+const getTransferItemsByDateAndUserId = async (fromDate, toDate, userId) => {
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await TransferItem.findAll({
+        where: {
+            createdAt: {
+                [Op.gte]: fromDate,
+                [Op.lt]: temp,
+            },
+            userId,
+        },
+        include: [
+            {
+                model: Item,
+                attributes: ['name']
+            }
+        ]
+    })
+}
+
 const getTransferItemsToDate = async (toDate) => {
     const query = "CASE \
         WHEN type = 'to' THEN qty \
@@ -79,6 +99,7 @@ const getTransferItemsToDateByUserId = async (toDate, userId) => {
 module.exports = Object.freeze({
     addAllTransferItems,
     getTransferItemsByDate,
+    getTransferItemsByDateAndUserId,
     getTransferItemsToDate,
     getTransferItemsToDateByUserId
 })

@@ -1,12 +1,11 @@
-const TransferItemService = require('../services/TransferItem.service');
-const InvoiceItemService = require("../services/InvoiceItem.service");
-const UserService = require('../services/User.service');
-const ItemService = require("../services/Item.service.js");
+const CustomerTransferItemService = require('../services/CustomerTransferItem.service');
+const CustomerService = require('../services/Customer.service');
+const ItemService = require('../services/Item.service');
 
-const StockValidator = require("../validators/Stock.validator.js");
+const CustomerStockValidator = require("../validators/CustomerStock.validator");
 
 const {
-    USER_NOT_EXIST,
+    CUSTOMER_NOT_EXIST,
 } = require('../configs/message.config');
 
 const {
@@ -31,19 +30,18 @@ const createItemMap = (items) => {
 
 const getClosingToDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getToDateValidator.validate(req.query);
+        const validation = CustomerStockValidator.getToDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         };
-        const { to, userId } = validation.value;
-        const user = await UserService.getUserById(userId);
-        if (!user) {
-            throw createError(BadRequestError, USER_NOT_EXIST);
+        const { to, customerId } = validation.value;
+        const customer = await CustomerService.getCustomerById(customerId);
+        if (!customer) {
+            throw createError(BadRequestError, CUSTOMER_NOT_EXIST);
         }
         const toDate = new Date(to);
         const _items = await ItemService.getAllItems();
-        const tranferItems = await TransferItemService.getTransferItemsToDateByUserId(toDate, userId);
-        const invoiceItems = await InvoiceItemService.getInvoiceItemsToDate(toDate);
+        const transferItems = await CustomerTransferItemService.getCustomerTransferItemsToDate
         const transferItemMap = createItemMap(tranferItems);
         const invoiceItemMap = createItemMap(invoiceItems);
         const items = _items.map(item => {

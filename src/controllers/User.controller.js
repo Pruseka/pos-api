@@ -52,14 +52,14 @@ const addAdmin = async (req, res, next) => {
 
 const addUser = async (req, res, next) => {
     try {
-        const validation = UserValidator.addAdminValidator.validate(req.body);
+        const validation = UserValidator.addValidator.validate(req.body);
         if (validation.error) {
             throw validation.error;
         }
         const user = validation.value;
         const salt = bcrypt.genSaltSync(SALT_ROUND);
         const password = bcrypt.hashSync(user.password, salt);
-        await UserService.createAdmin({
+        await UserService.createUser({
             ...user,
             password,
             role: SALESMAN,

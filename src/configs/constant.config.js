@@ -19,11 +19,11 @@ module.exports = Object.freeze({
     RETAIL: 'retail',
     WHOLESALES: 'wholesales',
 
-    CASH: 'cash',
-    CREDIT: 'credit',
-    RETURN: 'return',
-    CANCEL: 'cancel',
-    DAMAGE: 'damage',
+    CASH: 'cash', 
+    CREDIT: 'credit', 
+    RETURN: 'return', 
+    CANCEL: 'cancel', 
+    DAMAGE: 'damage', 
 
     UNPAID: 'unpaid',
     PAID: 'paid',

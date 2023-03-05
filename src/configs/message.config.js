@@ -15,6 +15,9 @@ module.exports = Object.freeze({
     ADD_EXPENSE_SUCCESS: 'Add expense successfully',
     UPDATE_EXPENSE_SUCCESS: 'Update expense successfully',
 
+    ADD_USER_SUCCESS: 'Add user successfully',
+    UPDATE_USER_SUCCESS: 'Update user successfully',
+
     ADD_ADMIN_SUCCESS: 'Add admin successfully',
 
     ADD_SUPPLY_SUCCESS: 'Add supply successfully',

@@ -41,16 +41,16 @@ const getClosingToDate = async (req, res, next) => {
         }
         const toDate = new Date(to);
         const _items = await ItemService.getAllItems();
-        const transferItems = await CustomerTransferItemService.getCustomerTransferItemsToDate
-        const transferItemMap = createItemMap(tranferItems);
-        const invoiceItemMap = createItemMap(invoiceItems);
+        const transferItems = await CustomerTransferItemService.getCustomerTransferItemsToDate(toDate);
+        const transferItemMap = createItemMap(transferItems);
         const items = _items.map(item => {
-            const invoiceQty = invoiceItemMap.get(item.itemId) ?? 0;
             const transferQty = transferItemMap.get(item.itemId) ?? 0;
             return {
                 itemId: item.itemId,
+                code: item.code,
                 name: item.name,
-                qty: transferQty - invoiceQty
+                category: item.Category.name,
+                qty: transferQty
             };
         });
         successRes(res, null, items);

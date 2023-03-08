@@ -3,6 +3,7 @@ const { fn, Op, literal } = require("sequelize");
 const Invoice = require("../models/Invoice.model.js");
 const Item = require('../models/Item.model');
 const InvoiceItem = require("../models/InvoiceItem.model.js");
+const Category = require("../models/Category.model.js");
 
 const addAllInvoiceItems = async (invoiceItems) => {
     await InvoiceItem.bulkCreate(invoiceItems);
@@ -51,7 +52,7 @@ const getInvoiceItemsToDateByUserId = async (toDate, userId) => {
     });
 }
 
-const getInvoiceItemsByDateAndUserId = async(fromDate, toDate, userId) => {
+const getInvoiceItemsByDateAndUserId = async (fromDate, toDate, userId) => {
     const temp = new Date(toDate);
     temp.setDate(temp.getDate() + 1);
     return await InvoiceItem.findAll({
@@ -71,7 +72,13 @@ const getInvoiceItemsByDateAndUserId = async(fromDate, toDate, userId) => {
             },
             {
                 model: Item,
-                attributes: ['name']
+                attributes: ['code', 'name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
             }
         ],
     });

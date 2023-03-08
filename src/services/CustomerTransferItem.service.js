@@ -18,7 +18,7 @@ const getCustomerTransferItemsToDate = async (toDate) => {
         },
         attributes: [
             'itemId',
-            [fn('sum', literal(`CASE WHEN type = 'cash' THEN qty WHEN type = 'return' THEN qty * -1 ELSE 0 END`)), 'qty'],
+            [fn('sum', literal(`CASE WHEN type = 'in' THEN qty ELSE -1 * qty END`)), 'qty'],
         ],
         group: ['itemId']
     });

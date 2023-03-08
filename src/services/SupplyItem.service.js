@@ -3,6 +3,7 @@ const { fn, Op, literal } = require("sequelize");
 const Supply = require("../models/Supply.model.js");
 const Item = require('../models/Item.model');
 const SupplyItem = require("../models/SupplyItem.model.js");
+const Category = require("../models/Category.model.js");
 
 const addAllSupplyItems = async (supplyItems) => {
     await SupplyItem.bulkCreate(supplyItems);
@@ -25,7 +26,13 @@ const getSupplyItemsByDate = async (fromDate, toDate) => {
             },
             {
                 model: Item,
-                attributes: ['name']
+                attributes: ['code','name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
             }
         ]
     })

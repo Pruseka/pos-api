@@ -3,6 +3,7 @@ const { fn, Op, literal } = require("sequelize");
 const User = require('../models/User.model');
 const Item = require('../models/Item.model');
 const TransferItem = require("../models/TransferItem.model.js");
+const Category = require("../models/Category.model");
 
 const addAllTransferItems = async (transferItems) => {
     await TransferItem.bulkCreate(transferItems);
@@ -25,7 +26,13 @@ const getTransferItemsByDate = async (fromDate, toDate) => {
             },
             {
                 model: Item,
-                attributes: ['name']
+                attributes: ['code', 'name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
             }
         ]
     })
@@ -45,7 +52,13 @@ const getTransferItemsByDateAndUserId = async (fromDate, toDate, userId) => {
         include: [
             {
                 model: Item,
-                attributes: ['name']
+                attributes: ['code','name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
             }
         ]
     })

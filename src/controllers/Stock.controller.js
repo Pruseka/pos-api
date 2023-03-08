@@ -18,7 +18,7 @@ const {
 } = require("../utils/response.utils.js");
 
 const {
-    BadRequestError
+    BadRequestError, TO, CASH, CREDIT, DAMAGE, RETURN
 } = require('../configs/constant.config');
 
 const createItemMap = (items) => {
@@ -51,7 +51,9 @@ const getClosingToDate = async (req, res, next) => {
             const transferQty = transferItemMap.get(item.itemId) ?? 0;
             return {
                 itemId: item.itemId,
+                code: item.code,
                 name: item.name,
+                category: item.Category.name,
                 qty: transferQty - invoiceQty
             };
         });
@@ -59,6 +61,13 @@ const getClosingToDate = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+}
+
+const getQtyFromTransfer = (type, qty) => {
+    if (type === TO) {
+        return qty;
+    }
+    return qty * -1;
 }
 
 const getInRecordByDate = async (req, res, next) => {
@@ -79,13 +88,45 @@ const getInRecordByDate = async (req, res, next) => {
             const { Item, userId, ...supplyItem } = _transferItem.get({ plain: true });
             return {
                 name: Item.name,
+                code: Item.code,
+                category: Item.Category.name,
                 ...supplyItem
             }
-        })
-        successRes(res, null, transferItems);
+        });
+        const inRecordMap = new Map();
+        transferItems.forEach(_transferItem => {
+            const { itemId, code, name, category, ...transferItem } = _transferItem;
+            const qty = getQtyFromTransfer(transferItem.type, transferItem.qty);
+            const inRecord = inRecordMap.get(itemId);
+            if (!inRecord) {
+                inRecordMap.set(itemId, {
+                    itemId,
+                    code,
+                    name,
+                    category,
+                    qty,
+                    list: [transferItem],
+                })
+            } else {
+                inRecord.qty += qty;
+                inRecord.list.push(transferItem);
+            }
+        });
+        const inRecords = Array.from(inRecordMap.values());
+        successRes(res, null, inRecords);
     } catch (err) {
         next(err);
     }
+}
+
+const getQtyFromInvoice = (type, qty) => {
+    if( type === CASH || type === CREDIT || type === DAMAGE) {
+        return qty;
+    }
+    if(type === RETURN) {
+        return qty * -1;
+    }
+    return 0;
 }
 
 const getOutRecordByDate = async (req, res, next) => {
@@ -98,19 +139,41 @@ const getOutRecordByDate = async (req, res, next) => {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const user = await UserService.getUserById(userId);
-        if(!user) {
+        if (!user) {
             throw createError(BadRequestError, USER_NOT_EXIST);
         }
-        const _invoiceItems= await InvoiceItemService.getInvoiceItemsByDateAndUserId(fromDate, toDate, userId);
+        const _invoiceItems = await InvoiceItemService.getInvoiceItemsByDateAndUserId(fromDate, toDate, userId);
         const invoiceItems = _invoiceItems.map(_invoiceItem => {
             const { Invoice, Item, price, amount, ...transferItem } = _invoiceItem.get({ plain: true });
             return {
                 customer: Invoice.customer,
+                code: Item.code,
                 name: Item.name,
+                category: Item.Category.name,
                 ...transferItem
             }
-        })
-        successRes(res, null, invoiceItems);
+        });
+        const outRecordMap = new Map();
+        invoiceItems.forEach(_invoiceItem => {
+            const { itemId, code, name, category, ...invoiceItem } = _invoiceItem;
+            const qty = getQtyFromInvoice(invoiceItem.type, invoiceItem.qty);
+            const outRecord = outRecordMap.get(itemId);
+            if (!outRecord) {
+                outRecordMap.set(itemId, {
+                    itemId,
+                    code,
+                    name,
+                    category,
+                    qty,
+                    list: [invoiceItem],
+                })
+            } else {
+                outRecord.qty += qty;
+                outRecord.list.push(invoiceItem);
+            }
+        });
+        const outRecords = Array.from(outRecordMap.values());
+        successRes(res, null, outRecords);
     } catch (err) {
         next(err);
     }

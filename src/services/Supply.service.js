@@ -1,8 +1,6 @@
 const { fn, literal, Op } = require("sequelize");
 
 const Supply = require("../models/Supply.model.js");
-const Item = require("../models/Item.model.js");
-const SupplyItem = require("../models/SupplyItem.model.js");
 const User = require("../models/User.model.js");
 
 const createSupply = async (supply) => {
@@ -20,14 +18,14 @@ const getSuppliesByDate = async (fromDate, toDate) => {
             }
         },
         include: [
-            {
-                model: SupplyItem,
-                include: [
-                    {
-                        model: Item,
-                    },
-                ]
-            },
+            // {
+            //     model: SupplyItem,
+            //     include: [
+            //         {
+            //             model: Item,
+            //         },
+            //     ]
+            // },
             {
                 model: User,
                 as: 'CreatedBy',

@@ -9,7 +9,13 @@ const {
 } = require("../utils/response.utils.js");
 
 const {
-    ADD_INVOICE_SUCCESS
+    createError
+} = require("../utils/error.utils");
+
+const {
+    ADD_INVOICE_SUCCESS,
+    INVOICE_NOT_EXIST,
+    PAID_INVOICE_SUCCESS,
 } = require("../configs/message.config.js");
 
 
@@ -19,6 +25,7 @@ const {
     UNPAID,
     PAID,
     ADMIN,
+    BadRequestError,
 } = require("../configs/constant.config.js");
 
 const createItemMap = (items) => {
@@ -145,20 +152,21 @@ const getCreditInvoicesByDate = async (req, res, next) => {
     }
 }
 
-const updateInvoiceStatus = async(req, res, next) => {
+const updateInvoiceStatus = async (req, res, next) => {
     try {
         const validation = InvoiceValidator.updateValidator.validate(req.body);
-        if(validation.error) {
+        if (validation.error) {
             throw validation.error;
         }
         const { invoiceId } = validation.value;
         await InvoiceService.updateInvoice(invoiceId, {
             status: PAID,
-        })
-    } catch(err) {
+        });
+        successRes(res, null, PAID_INVOICE_SUCCESS);
+    } catch (err) {
         next(err);
     }
-} 
+}
 
 const getInvoiceById = async (req, res, next) => {
     try {
@@ -167,8 +175,29 @@ const getInvoiceById = async (req, res, next) => {
             throw validation.error;
         };
         const { invoiceId } = validation.value;
-        const _invoice = await InvoiceService.getInvoiceById(invoiceId);
-        successRes(res, null, _invoice);
+        const invoice = await InvoiceService.getInvoiceById(invoiceId);
+        if (!invoice) createError(BadRequestError, INVOICE_NOT_EXIST);
+        const { customer, customerType, type, amount, CreatedBy, InvoiceItems } = invoice.get({ plain: true });
+        const items = InvoiceItems.map(item => {
+            const { itemId, qty, price, amount, Item } = item;
+            return {
+                itemId,
+                code: Item.code,
+                name: Item.name,
+                category: Item.Category.name,
+                qty,
+                price,
+                amount,
+            }
+        })
+        successRes(res, null, {
+            customer,
+            customerType,
+            type,
+            amount,
+            createdBy: CreatedBy.name,
+            items
+        });
     } catch (err) {
         next(err);
     }

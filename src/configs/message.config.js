@@ -22,7 +22,11 @@ module.exports = Object.freeze({
     ADD_ADMIN_SUCCESS: 'Add admin successfully',
 
     ADD_SUPPLY_SUCCESS: 'Add supply successfully',
+    PAID_SUPPLY_SUCCESS: 'Paid supply successfully',
+
     ADD_INVOICE_SUCCESS: 'Add invoice successfully',
+    PAID_INVOICE_SUCCESS: 'Paid invoice successfully',
+
     ADD_TRANSFER_SUCCESS: 'Add transfer successfully',
     ADD_CUSTOMER_TRANSFER_SUCCESS: 'Add customer transfer successfully',
 
@@ -36,6 +40,7 @@ module.exports = Object.freeze({
     USER_NOT_EXIST: 'User doesn\'t exist',
     CUSTOMER_NOT_EXIST: 'Customer doesn\'t exist',
     ITEM_NOT_EXIST: 'Item doesn\'t exist',
+    INVOICE_NOT_EXIST: 'Invoice doesn\'t exist',
 
 });
 

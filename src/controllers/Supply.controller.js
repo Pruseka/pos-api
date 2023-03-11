@@ -102,31 +102,19 @@ const getSupplyByDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _supplies = await Supplieservice.getSuppliesByDate(fromDate, toDate);
         const supplies = _supplies.map(_supply => {
-            const { SupplyItems, CreatedBy, withdrawnBy, withdrawnAt, ...supply } = _supply.get({ plain: true });
-            const items = SupplyItems.map(supplyItem => {
-                return {
-                    itemId: supplyItem.itemId,
-                    name: supplyItem.Item.name,
-                    qty: supplyItem.qty,
-                    price: supplyItem.price,
-                    amount: supplyItem.amount,
-                }
-            });
+            const { createdAt, supplyId, CreatedBy, supplier, type, amount } = _supply.get({ plain: true });
             return {
-                items,
-                createdByName: CreatedBy.name,
-                ...supply
+                createdAt,
+                supplyId,
+                createdBy: CreatedBy.name,
+                supplier,
+                type,
+                amount
             }
         });
         const salesmanSupplies = supplies
             .filter(supply => supply.createdBy === req.user.userId)
-            .map(({ amount, items: supplyItems, ...supply }) => {
-                const items = supplyItems.map(({ amount, ...item }) => item);
-                return {
-                    items,
-                    ...supply
-                }
-            });
+            .map(({ amount, ...supply }) => supply);
         successRes(res, null, req.user.role === ADMIN ? supplies : salesmanSupplies);
     } catch (err) {
         next(err);

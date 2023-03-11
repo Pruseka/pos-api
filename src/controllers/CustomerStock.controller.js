@@ -17,7 +17,7 @@ const {
 } = require("../utils/response.utils.js");
 
 const {
-    BadRequestError
+    BadRequestError, IN, OUT
 } = require('../configs/constant.config');
 
 const createItemMap = (items) => {
@@ -66,7 +66,7 @@ const getInRecordByDate = async (req, res, next) => {
             throw validation.error;
         }
         const { from, to, customerId } = validation.value;
-        const customer = await UserService.getUserById(customerId);
+        const customer = await CustomerService.getCustomerById(customerId);
         if (!customer) {
             throw createError(BadRequestError, CUSTOMER_NOT_EXIST);
         }
@@ -74,13 +74,35 @@ const getInRecordByDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _transferItems = await CustomerTransferItemService.getCustomerTransferItemsByDateAndCustomerId(fromDate, toDate, customerId);
         const transferItems = _transferItems.map(_transferItem => {
-            const { Item, userId, ...supplyItem } = _transferItem.get({ plain: true });
+            const { Item, userId, ...transferItem } = _transferItem.get({ plain: true });
             return {
+                code: Item.code,
                 name: Item.name,
-                ...supplyItem
+                category: Item.Category.name,
+                ...transferItem
             }
-        })
-        successRes(res, null, transferItems);
+        });
+        const inItems = transferItems.filter(transferItem => transferItem.type === IN);
+        const inRecordMap = new Map();
+        inItems.forEach(_transferItem => {
+            const { itemId, code, name, category, ...transferItem } = _transferItem;
+            const inRecord = inRecordMap.get(itemId);
+            if (!inRecord) {
+                inRecordMap.set(itemId, {
+                    itemId,
+                    code,
+                    name,
+                    category,
+                    qty: transferItem.qty,
+                    list: [transferItem],
+                })
+            } else {
+                inRecord.qty += qty;
+                inRecord.list.push(transferItem);
+            }
+        });
+        const inRecords = Array.from(inRecordMap.values());
+        successRes(res, null, inRecords);
     } catch (err) {
         next(err);
     }
@@ -88,27 +110,48 @@ const getInRecordByDate = async (req, res, next) => {
 
 const getOutRecordByDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getByDateValidator.validate(req.query);
+        const validation = CustomerStockValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         }
-        const { from, to, userId } = validation.value;
+        const { from, to, customerId } = validation.value;
+        const customer = await CustomerService.getCustomerById(customerId);
+        if (!customer) {
+            throw createError(BadRequestError, CUSTOMER_NOT_EXIST);
+        }
         const fromDate = new Date(from);
         const toDate = new Date(to);
-        const user = await UserService.getUserById(userId);
-        if(!user) {
-            throw createError(BadRequestError, USER_NOT_EXIST);
-        }
-        const _invoiceItems= await InvoiceItemService.getInvoiceItemsByDateAndUserId(fromDate, toDate, userId);
-        const invoiceItems = _invoiceItems.map(_invoiceItem => {
-            const { Invoice, Item, price, amount, ...transferItem } = _invoiceItem.get({ plain: true });
+        const _transferItems = await CustomerTransferItemService.getCustomerTransferItemsByDateAndCustomerId(fromDate, toDate, customerId);
+        const transferItems = _transferItems.map(_transferItem => {
+            const { Item, userId, ...transferItem } = _transferItem.get({ plain: true });
             return {
-                customer: Invoice.customer,
+                code: Item.code,
                 name: Item.name,
+                category: Item.Category.name,
                 ...transferItem
             }
-        })
-        successRes(res, null, invoiceItems);
+        });
+        const outItems = transferItems.filter(transferItem => transferItem.type === OUT);
+        const outRecordMap = new Map();
+        outItems.forEach(_transferItem => {
+            const { itemId, code, name, category, ...transferItem } = _transferItem;
+            const outRecord = outRecordMap.get(itemId);
+            if (!outRecord) {
+                outRecordMap.set(itemId, {
+                    itemId,
+                    code,
+                    name,
+                    category,
+                    qty: transferItem.qty,
+                    list: [transferItem],
+                })
+            } else {
+                outRecord.qty += qty;
+                outRecord.list.push(transferItem);
+            }
+        });
+        const outRecords = Array.from(outRecordMap.values());
+        successRes(res, null, outRecords);
     } catch (err) {
         next(err);
     }

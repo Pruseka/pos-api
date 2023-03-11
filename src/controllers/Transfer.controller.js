@@ -104,7 +104,7 @@ const getTransferByDate = async (req, res, next) => {
             return {
                 items,
                 user: User.name,
-                createdByName: CreatedBy.name,
+                createdBy: CreatedBy.name,
                 ...transfer
             }
         });

@@ -1,7 +1,8 @@
 const { fn, Op, literal } = require("sequelize");
 
-const CustomerTransfer = require('../models/CustomerTransfer.model');
 const CustomerTransferItem = require("../models/CustomerTransferItem.model.js");
+const Item = require('../models/Item.model');
+const Category = require("../models/Category.model");
 
 const addAllCustomerTransferItems = async (customertransferItems) => {
     await CustomerTransferItem.bulkCreate(customertransferItems);

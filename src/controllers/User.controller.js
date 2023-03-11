@@ -9,6 +9,7 @@ const {
     ADD_ADMIN_SUCCESS,
     UPDATE_USER_SUCCESS,
     INVALID_APP_SECRET,
+    UPDATE_PASSWORD_SUCCESS,
 } = require("../configs/message.config.js");
 
 const {
@@ -84,9 +85,31 @@ const updateUser = async (req, res, next) => {
     }
 }
 
+const updatePassword = async(req, res, next) => {
+    try {
+        const validation = UserValidator.updatePasswordValidator.validate(req.body);
+        if(validation.error) {
+            throw validation.error;
+        }
+        const { userId, password } = validation.value;
+        const salt = bcrypt.genSaltSync(SALT_ROUND);
+        const hashPassword = bcrypt.hashSync(password, salt);
+        await UserService.updateUser(userId, {
+            password: hashPassword
+        });
+        successRes(res, UPDATE_PASSWORD_SUCCESS);
+    } catch(err) {
+        next(err);
+    }
+}
+
 const getAllUsers = async (_, res, next) => {
     try {
-        const users = await UserService.getAllUsers();
+        const _users = await UserService.getAllUsers();
+        const users = _users.map(_user => {
+            const { password, createdAt, updatedAt, ...user } = _user.get({ plain: true });
+            return user;
+        })
         successRes(res, null, users);
     } catch (err) {
         next(err);
@@ -98,5 +121,6 @@ module.exports = Object.freeze({
     addAdmin,
     addUser,
     updateUser,
-    getAllUsers
+    updatePassword,
+    getAllUsers,
 })

@@ -75,7 +75,7 @@ Invoice.belongsTo(User, {
 });
 
 Invoice.belongsTo(User, {
-    as: 'ReceviedBy',
+    as: 'ReceivedBy',
     foreignKey: 'receivedBy'
 });
 // await Invoice.sync();

@@ -4,9 +4,44 @@ const User = require("../models/User.model.js");
 const Invoice = require("../models/Invoice.model.js");
 const InvoiceItem = require("../models/InvoiceItem.model.js");
 const Item = require("../models/Item.model.js");
+const Category = require("../models/Category.model.js");
+const { UNPAID, PAID } = require("../configs/constant.config.js");
 
 const createInvoice = async (invoice) => {
     return await Invoice.create(invoice);
+}
+
+const updateInvoice = async (invoiceId, invoice) => {
+    await Invoice.update(invoice, {
+        where: { invoiceId }
+    })
+}
+
+const getInvoiceById = async (invoiceId) => {
+    return await Invoice.findByPk(invoiceId, {
+        include: [
+            {
+                model: InvoiceItem,
+                include: [
+                    {
+                        model: Item,
+                        attributes: ['code', 'name'],
+                        include: [
+                            {
+                                model: Category,
+                                attributes: ['name']
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                model: User,
+                as: 'CreatedBy',
+                attributes: ['name']
+            }
+        ]
+    })
 }
 
 const getInvoicesByDate = async (fromDate, toDate) => {
@@ -20,13 +55,53 @@ const getInvoicesByDate = async (fromDate, toDate) => {
             }
         },
         include: [
+            // {
+            //     model: InvoiceItem,
+            //     include: [
+            //         {
+            //             model: Item,
+            //             attributes: ['code', 'name'],
+            //             include: [
+            //                 {
+            //                     model: Category,
+            //                     attributes: ['name']
+            //                 }
+            //             ]
+            //         },
+            //     ]
+            // },
             {
-                model: InvoiceItem,
-                include: [
-                    {
-                        model: Item,
-                    },
-                ]
+                model: User,
+                as: 'CreatedBy',
+                attributes: ['name']
+            }
+        ]
+    })
+};
+
+const getCreditInvoicesByDate = async (fromDate, toDate) => {
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await Invoice.findAll({
+        where: {
+            [Op.or]: [
+                {
+                    status: UNPAID
+                },
+                {
+                    status: PAID,
+                    receivedAt: {
+                        [Op.gte]: fromDate,
+                        [Op.lt]: temp,
+                    }
+                }
+            ]
+        },
+        include: [
+            {
+                model: User,
+                as: 'ReceivedBy',
+                attributes: ['name']
             },
             {
                 model: User,
@@ -56,6 +131,9 @@ const getTotalAmountByDate = async (fromDate, toDate) => {
 
 module.exports = Object.freeze({
     createInvoice,
+    updateInvoice,
+    getInvoiceById,
     getInvoicesByDate,
+    getCreditInvoicesByDate,
     getTotalAmountByDate,
 })

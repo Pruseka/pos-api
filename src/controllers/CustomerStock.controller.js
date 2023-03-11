@@ -61,18 +61,18 @@ const getClosingToDate = async (req, res, next) => {
 
 const getInRecordByDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getByDateValidator.validate(req.query);
+        const validation = CustomerStockValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         }
-        const { from, to, userId } = validation.value;
-        const user = await UserService.getUserById(userId);
-        if (!user) {
-            throw createError(BadRequestError, USER_NOT_EXIST);
+        const { from, to, customerId } = validation.value;
+        const customer = await UserService.getUserById(customerId);
+        if (!customer) {
+            throw createError(BadRequestError, CUSTOMER_NOT_EXIST);
         }
         const fromDate = new Date(from);
         const toDate = new Date(to);
-        const _transferItems = await TransferItemService.getTransferItemsByDateAndUserId(fromDate, toDate, userId);
+        const _transferItems = await CustomerTransferItemService.getCustomerTransferItemsByDateAndCustomerId(fromDate, toDate, customerId);
         const transferItems = _transferItems.map(_transferItem => {
             const { Item, userId, ...supplyItem } = _transferItem.get({ plain: true });
             return {

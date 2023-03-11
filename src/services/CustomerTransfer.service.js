@@ -5,6 +5,7 @@ const Customer = require('../models/Customer.model');
 const CustomerTransfer = require("../models/CustomerTransfer.model.js");
 const CustomerTransferItem = require("../models/CustomerTransferItem.model.js");
 const Item = require("../models/Item.model.js");
+const Category = require("../models/Category.model.js");
 
 const createCustomerTransfer = async (customertransfer) => {
     return await CustomerTransfer.create(customertransfer);
@@ -26,6 +27,13 @@ const getCustomerTransfersByDate = async (fromDate, toDate) => {
                 include: [
                     {
                         model: Item,
+                        attributes: ['code', 'name'],
+                        include: [
+                            {
+                                model: Category,
+                                attributes: ['name']
+                            }
+                        ]
                     },
                 ]
             },

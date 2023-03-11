@@ -24,29 +24,34 @@ const getCustomerTransferItemsToDate = async (toDate) => {
     });
 }
 
-const getTransferItemsToDate = async(toDate, customerId) => {
+const getCustomerTransferItemsByDateAndCustomerId = async (fromDate, toDate, customerId) => {
     const temp = new Date(toDate);
-    temp.setDate(temp.getDate() +1);
+    temp.setDate(temp.getDate() + 1);
     return await CustomerTransferItem.findAll({
         where: {
             createdAt: {
+                [Op.gte]: fromDate,
                 [Op.lt]: temp,
             },
-            customerId
+            customerId,
         },
         include: [
             {
-                model: CustomerTransfer,
-                where: {
-                    customerId
-                },
-                attributes: ['']
+                model: Item,
+                attributes: ['code', 'name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
             }
         ]
-    });
+    })
 }
 
 module.exports = Object.freeze({
     addAllCustomerTransferItems,
     getCustomerTransferItemsToDate,
-})
+    getCustomerTransferItemsByDateAndCustomerId,
+});

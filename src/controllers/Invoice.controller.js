@@ -84,6 +84,8 @@ const createInvoice = async (req, res, next) => {
         const _invoice = {
             customer, customerType, type, status, amount,
             createdBy: req.user.userId,
+            receivedBy: status === PAID ? req.user.userId : null,
+            receivedAt: status === PAID ? new Date() : null,
         }
         const invoice = await InvoiceService.createInvoice(_invoice);
         const invoiceItems = _invoiceItems.map(invoiceItem => ({
@@ -108,20 +110,16 @@ const getInvoiceByDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _invoices = await InvoiceService.getInvoicesByDate(fromDate, toDate);
         const invoices = _invoices.map(_invoice => {
-            const { InvoiceItems, CreatedBy, receivedBy, receivedAt, ...invoice } = _invoice.get({ plain: true });
-            const items = InvoiceItems.map(invoiceItem => {
-                return {
-                    itemId: invoiceItem.itemId,
-                    name: invoiceItem.Item.name,
-                    qty: invoiceItem.qty,
-                    price: invoiceItem.price,
-                    amount: invoiceItem.amount,
-                }
-            });
+            const { createdAt, CreatedBy, invoiceId, customer, customerType, type, amount } = _invoice.get({ plain: true });
+
             return {
-                items,
-                createdByName: CreatedBy.name,
-                ...invoice
+                createdAt,
+                invoiceId,
+                createdBy: CreatedBy.name,
+                customer,
+                customerType,
+                type,
+                amount,
             }
         });
         const salesmanInvoices = invoices.filter(invoice => invoice.createdBy === req.user.userId);
@@ -131,7 +129,55 @@ const getInvoiceByDate = async (req, res, next) => {
     }
 }
 
+const getCreditInvoicesByDate = async (req, res, next) => {
+    try {
+        const validation = InvoiceValidator.getByDateValidator.validate(req.query);
+        if (validation.error) {
+            throw validation.error;
+        }
+        const { from, to } = validation.value;
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        const _creditInvoices = await InvoiceService.getCreditInvoicesByDate(fromDate, toDate);
+        successRes(res, null, _creditInvoices);
+    } catch (err) {
+        next(err);
+    }
+}
+
+const updateInvoiceStatus = async(req, res, next) => {
+    try {
+        const validation = InvoiceValidator.updateValidator.validate(req.body);
+        if(validation.error) {
+            throw validation.error;
+        }
+        const { invoiceId } = validation.value;
+        await InvoiceService.updateInvoice(invoiceId, {
+            status: PAID,
+        })
+    } catch(err) {
+        next(err);
+    }
+} 
+
+const getInvoiceById = async (req, res, next) => {
+    try {
+        const validation = InvoiceValidator.getValidator.validate(req.params);
+        if (validation.error) {
+            throw validation.error;
+        };
+        const { invoiceId } = validation.value;
+        const _invoice = await InvoiceService.getInvoiceById(invoiceId);
+        successRes(res, null, _invoice);
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = Object.freeze({
     createInvoice,
+    updateInvoiceStatus,
+    getInvoiceById,
     getInvoiceByDate,
+    getCreditInvoicesByDate,
 })

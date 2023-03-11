@@ -97,7 +97,9 @@ const getCustomerTransferByDate = async (req, res, next) => {
             const items = CustomerTransferItems.map(customertransferItem => {
                 return {
                     itemId: customertransferItem.itemId,
+                    code: customertransferItem.Item.code,
                     name: customertransferItem.Item.name,
+                    category: customertransfer.Item.Category.name,
                     qty: customertransferItem.qty,
                 }
             });

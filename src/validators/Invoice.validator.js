@@ -22,12 +22,22 @@ const addValidator = Joi.object({
     items: Joi.array().items(item),
 });
 
+const getValidator = Joi.object({
+    invoiceId: Joi.string().required(),
+})
+
 const getByDateValidator = Joi.object({
     from: Joi.date().required(),
     to: Joi.date().required(),
+});
+
+const updateValidator = Joi.object({
+    invoiceId: Joi.string().required(),
 })
 
 module.exports = Object.freeze({
     addValidator,
+    getValidator,
     getByDateValidator,
+    updateValidator,
 });

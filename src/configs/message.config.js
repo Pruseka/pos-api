@@ -17,6 +17,7 @@ module.exports = Object.freeze({
 
     ADD_USER_SUCCESS: 'Add user successfully',
     UPDATE_USER_SUCCESS: 'Update user successfully',
+    UPDATE_PASSWORD_SUCCESS: 'Update password successfully',
 
     ADD_ADMIN_SUCCESS: 'Add admin successfully',
 

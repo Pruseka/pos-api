@@ -1,4 +1,4 @@
-const Supplieservice = require("../services/Supply.service.js");
+const SupplyService = require("../services/Supply.service.js");
 const ItemService = require("../services/Item.service.js");
 const SupplyItemService = require("../services/SupplyItem.service.js");
 
@@ -9,15 +9,21 @@ const {
 } = require("../utils/response.utils.js");
 
 const {
-    ADD_SUPPLY_SUCCESS
-} = require("../configs/message.config.js");
+    createError
+} = require("../utils/error.utils");
 
+const {
+    ADD_SUPPLY_SUCCESS,
+    PAID_SUPPLY_SUCCESS,
+    SUPPLY_NOT_EXIST,
+} = require("../configs/message.config.js");
 
 const {
     CREDIT,
     UNPAID,
     PAID,
     ADMIN,
+    BadRequestError
 } = require("../configs/constant.config.js");
 
 const createItemMap = (items) => {
@@ -79,7 +85,7 @@ const createSupply = async (req, res, next) => {
             supplier, type, status, amount,
             createdBy: req.user.userId,
         }
-        const supply = await Supplieservice.createSupply(_supply);
+        const supply = await SupplyService.createSupply(_supply);
         const supplyItems = _supplyItems.map(supplyItem => ({
             supplyId: supply.supplyId,
             ...supplyItem
@@ -100,7 +106,7 @@ const getSupplyByDate = async (req, res, next) => {
         const { from, to } = validation.value;
         const fromDate = new Date(from);
         const toDate = new Date(to);
-        const _supplies = await Supplieservice.getSuppliesByDate(fromDate, toDate);
+        const _supplies = await SupplyService.getSuppliesByDate(fromDate, toDate);
         const supplies = _supplies.map(_supply => {
             const { createdAt, supplyId, CreatedBy, supplier, type, amount } = _supply.get({ plain: true });
             return {
@@ -121,7 +127,102 @@ const getSupplyByDate = async (req, res, next) => {
     }
 }
 
+const getCreditSuppliesByDate = async (req, res, next) => {
+    try {
+        const validation = SupplyValidator.getByDateValidator.validate(req.query);
+        if (validation.error) {
+            throw validation.error;
+        }
+        const { from, to } = validation.value;
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        const _creditSupplies = await SupplyService.getCreditSuppliesByDate(fromDate, toDate);
+        const supplies = _creditSupplies.map(_supply => {
+            const { supplyId, supplier, status, amount, CreatedBy, createdAt, WithdrawnBy, withdrawnAt } = _supply.get({ plain: true });
+            return {
+                supplyId,
+                supplier,
+                status,
+                amount,
+                createdBy: CreatedBy.name,
+                createdAt,
+                withdrawnBy: WithdrawnBy ? WithdrawnBy.name : null,
+                withdrawnAt,
+            }
+        });
+        const salesmanSupplies = supplies
+            .filter(supply => supply.createdBy === req.user.userId)
+            .map(({ amount, ...supply }) => supply);
+        successRes(res, null, req.user.role === ADMIN ? supplies : salesmanSupplies);
+    } catch (err) {
+        next(err);
+    }
+}
+
+const updateSupplyStatus = async (req, res, next) => {
+    try {
+        const validation = SupplyValidator.updateValidator.validate(req.body);
+        if (validation.error) {
+            throw validation.error;
+        }
+        const { supplyId } = validation.value;
+        await SupplyService.updateSupply(supplyId, {
+            status: PAID,
+            withdrawnBy: req.user.userId,
+            withdrawnAt: new Date()
+        });
+        successRes(res, null, PAID_SUPPLY_SUCCESS);
+    } catch (err) {
+        next(err);
+    }
+}
+
+const getSupplyById = async (req, res, next) => {
+    try {
+        const validation = SupplyValidator.getValidator.validate(req.params);
+        if (validation.error) {
+            throw validation.error;
+        };
+        const { supplyId } = validation.value;
+        const _supply = await SupplyService.getSupplyById(supplyId);
+        if (!_supply) createError(BadRequestError, SUPPLY_NOT_EXIST);
+        const { supplier, type, amount, CreatedBy, SupplyItems } = _supply.get({ plain: true });
+        const items = SupplyItems.map(item => {
+            const { itemId, qty, price, amount, Item } = item;
+            return {
+                itemId,
+                code: Item.code,
+                name: Item.name,
+                category: Item.Category.name,
+                qty,
+                price,
+                amount,
+            }
+        });
+        const salesmanItems = items.map(({ amount, ...item }) => item);
+        const supply = {
+            supplier,
+            type,
+            amount,
+            createdBy: CreatedBy.name,
+            items
+        }
+        const salesmanSupply = {
+            supplier,
+            type,
+            createdBy: CreatedBy.name,
+            items: salesmanItems,
+        }
+        successRes(res, null, req.user.role === ADMIN ? supply : salesmanSupply);
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = Object.freeze({
     createSupply,
+    getSupplyById,
     getSupplyByDate,
+    getCreditSuppliesByDate,
+    updateSupplyStatus
 })

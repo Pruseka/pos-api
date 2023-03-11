@@ -146,7 +146,15 @@ const getCreditInvoicesByDate = async (req, res, next) => {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const _creditInvoices = await InvoiceService.getCreditInvoicesByDate(fromDate, toDate);
-        successRes(res, null, _creditInvoices);
+        const creditInvoices = _creditInvoices.map(_invoice => {
+            const { customerType, type, createdBy, CreatedBy, receivedBy, ReceivedBy, ...invoice } = _invoice.get({ plain: true });
+            return {
+                ...invoice,
+                createdBy: CreatedBy.name,
+                receivedBy: ReceivedBy ? ReceivedBy.name : null,
+            }
+        })
+        successRes(res, null, creditInvoices);
     } catch (err) {
         next(err);
     }
@@ -161,6 +169,8 @@ const updateInvoiceStatus = async (req, res, next) => {
         const { invoiceId } = validation.value;
         await InvoiceService.updateInvoice(invoiceId, {
             status: PAID,
+            receivedBy: req.user.userId,
+            receivedAt: new Date()
         });
         successRes(res, null, PAID_INVOICE_SUCCESS);
     } catch (err) {

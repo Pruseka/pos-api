@@ -11,7 +11,7 @@ const { Router } = require("express");
 const invoiceRoute = Router();
 
 invoiceRoute.post('/', createInvoice);
-invoiceRoute.put('/', updateInvoiceStatus);
+invoiceRoute.put('/status', updateInvoiceStatus);
 invoiceRoute.get('/', getInvoiceByDate);
 invoiceRoute.get('/credit', getCreditInvoicesByDate);
 invoiceRoute.get('/:invoiceId', getInvoiceById);

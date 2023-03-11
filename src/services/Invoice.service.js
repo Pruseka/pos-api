@@ -5,7 +5,7 @@ const Invoice = require("../models/Invoice.model.js");
 const InvoiceItem = require("../models/InvoiceItem.model.js");
 const Item = require("../models/Item.model.js");
 const Category = require("../models/Category.model.js");
-const { UNPAID, PAID } = require("../configs/constant.config.js");
+const { UNPAID, CREDIT, PAID } = require("../configs/constant.config.js");
 
 const createInvoice = async (invoice) => {
     return await Invoice.create(invoice);
@@ -90,6 +90,7 @@ const getCreditInvoicesByDate = async (fromDate, toDate) => {
                 },
                 {
                     status: PAID,
+                    type: CREDIT,
                     receivedAt: {
                         [Op.gte]: fromDate,
                         [Op.lt]: temp,
@@ -108,6 +109,9 @@ const getCreditInvoicesByDate = async (fromDate, toDate) => {
                 as: 'CreatedBy',
                 attributes: ['name']
             }
+        ],
+        order: [
+            ['status', 'DESC']
         ]
     })
 }

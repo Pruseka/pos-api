@@ -18,6 +18,14 @@ const addValidator = Joi.object({
     items: Joi.array().items(item),
 });
 
+const getValidator = Joi.object({
+    supplyId: Joi.string().required(),
+})
+
+const updateValidator = Joi.object({
+    supplyId: Joi.string().required()
+})
+
 const getByDateValidator = Joi.object({
     from: Joi.date().required(),
     to: Joi.date().required(),
@@ -25,5 +33,7 @@ const getByDateValidator = Joi.object({
 
 module.exports = Object.freeze({
     addValidator,
+    getValidator,
+    updateValidator,
     getByDateValidator,
 });

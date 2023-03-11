@@ -41,6 +41,7 @@ module.exports = Object.freeze({
     CUSTOMER_NOT_EXIST: 'Customer doesn\'t exist',
     ITEM_NOT_EXIST: 'Item doesn\'t exist',
     INVOICE_NOT_EXIST: 'Invoice doesn\'t exist',
+    SUPPLY_NOT_EXIST: 'Supply doesn\'t exist',
 
 });
 

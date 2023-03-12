@@ -93,12 +93,21 @@ const getCustomerTransferByDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _customertransfers = await CustomerTransferService.getCustomerTransfersByDate(fromDate, toDate);
         const customertransfers = _customertransfers.map(_customertransfer => {
-            const { Customer, customerTransferId, type, CreatedBy } = _customertransfer.get({ plain: true });
+            const { CustomerTransferItems, Customer, customerTransferId, type, CreatedBy, createdAt } = _customertransfer.get({ plain: true });
+            const items = CustomerTransferItems.map(item => ({
+                itemId: item.itemId,
+                code: item.Item.code,
+                name: item.Item.name,
+                category: item.Item.Category.name,
+                qty: item.qty
+            }))
             return {
                 customerTransferId,
                 type,
+                createdAt,
                 customer: Customer.name,
                 createdBy: CreatedBy.name,
+                items
             }
         });
         successRes(res, null, customertransfers);

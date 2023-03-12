@@ -4,6 +4,7 @@ const User = require("../models/User.model.js");
 const Transfer = require("../models/Transfer.model.js");
 const TransferItem = require("../models/TransferItem.model.js");
 const Item = require("../models/Item.model.js");
+const Category = require("../models/Category.model.js");
 
 const createTransfer = async (transfer) => {
     return await Transfer.create(transfer);
@@ -25,6 +26,13 @@ const getTransfersByDate = async (fromDate, toDate) => {
                 include: [
                     {
                         model: Item,
+                        attributes: ['code', 'name'],
+                        include: [
+                            {
+                                model: Category,
+                                attributes: ['name']
+                            }
+                        ]
                     },
                 ]
             },

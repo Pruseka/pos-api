@@ -23,21 +23,6 @@ const getCustomerTransfersByDate = async (fromDate, toDate) => {
         },
         include: [
             {
-                model: CustomerTransferItem,
-                include: [
-                    {
-                        model: Item,
-                        attributes: ['code', 'name'],
-                        include: [
-                            {
-                                model: Category,
-                                attributes: ['name']
-                            }
-                        ]
-                    },
-                ]
-            },
-            {
                 model: Customer,
                 as: 'Customer',
                 attributes: ['name']

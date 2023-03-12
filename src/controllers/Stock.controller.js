@@ -97,6 +97,7 @@ const getInRecordByDate = async (req, res, next) => {
         transferItems.forEach(_transferItem => {
             const { itemId, code, name, category, ...transferItem } = _transferItem;
             const qty = getQtyFromTransfer(transferItem.type, transferItem.qty);
+            transferItem.type = TO ? "From Warehouse" : "To Warehouse";
             const inRecord = inRecordMap.get(itemId);
             if (!inRecord) {
                 inRecordMap.set(itemId, {
@@ -120,10 +121,10 @@ const getInRecordByDate = async (req, res, next) => {
 }
 
 const getQtyFromInvoice = (type, qty) => {
-    if( type === CASH || type === CREDIT || type === DAMAGE) {
+    if (type === CASH || type === CREDIT || type === DAMAGE) {
         return qty;
     }
-    if(type === RETURN) {
+    if (type === RETURN) {
         return qty * -1;
     }
     return 0;

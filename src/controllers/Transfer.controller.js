@@ -11,7 +11,8 @@ const {
 
 const {
     ADD_TRANSFER_SUCCESS,
-    USER_NOT_EXIST
+    USER_NOT_EXIST,
+    ONLY_VAN_SALES_ALLOW,
 } = require("../configs/message.config.js");
 
 const {
@@ -19,7 +20,7 @@ const {
 } = require('../utils/error.utils');
 
 const {
-    BadRequestError,
+    BadRequestError, VAN_SALES,
 } = require("../configs/constant.config.js");
 
 const createItemMap = (items) => {
@@ -60,6 +61,9 @@ const createTransfer = async (req, res, next) => {
         const user = await UserService.getUserById(userId);
         if (!user) {
             throw createError(BadRequestError, USER_NOT_EXIST);
+        }
+        if(user.role !== VAN_SALES) {
+            throw createError(BadRequestError, ONLY_VAN_SALES_ALLOW)
         }
         const itemIds = items.map(item => item.itemId);
         const dbItems = await ItemService.getItemsByIds(itemIds);

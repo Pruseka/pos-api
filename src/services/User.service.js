@@ -1,7 +1,7 @@
 const User = require("../models/User.model.js");
 
 const {
-    SALES_MANAGER,
+    SALES_ADMIN,
     VAN_SALES,
 } = require("../configs/constant.config");
 
@@ -21,10 +21,10 @@ const getAllVanSales = async () => {
     })
 }
 
-const getAllSalesManagers = async() => {
+const getAllSalesAdmins = async() => {
     return await User.findAll({
         where: {
-            role: SALES_MANAGER,
+            role: SALES_ADMIN,
         }
     })
 }
@@ -48,7 +48,7 @@ const updateUser = async (userId, user) => {
 module.exports = Object.freeze({
     createUser,
     getAllUsers,
-    getAllSalesManagers,
+    getAllSalesAdmins,
     getAllVanSales,
     getUserById,
     getUserByEmail,

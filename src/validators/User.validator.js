@@ -2,13 +2,13 @@ const Joi = require('joi');
 
 const {
     ADMIN,
-    SALES_MANAGER,
+    SALES_ADMIN,
     VAN_SALES,
 } = require("../configs/constant.config");
 
 const addValidator = Joi.object({
     name: Joi.string().required(),
-    role: Joi.string().required().valid(ADMIN, SALES_MANAGER, VAN_SALES),
+    role: Joi.string().required().valid(ADMIN, SALES_ADMIN, VAN_SALES),
     email: Joi.string().required(),
     password: Joi.string().required(),
 });
@@ -23,7 +23,7 @@ const addAdminValidator = Joi.object({
 const updateValidator = Joi.object({
     userId: Joi.string().uuid().required(),
     name: Joi.string().optional(),
-    role: Joi.string().required().valid(ADMIN, SALES_MANAGER, VAN_SALES),
+    role: Joi.string().required().valid(ADMIN, SALES_ADMIN, VAN_SALES),
     email: Joi.string().optional(),
 });
 

@@ -12,15 +12,15 @@ const authHandler = require('../middlewares/Auth.middleware');
 
 const {
     ADMIN,
-    SALES_MANAGER,
+    SALES_ADMIN,
 } = require("../configs/constant.config");
 
 const supplyRoute = Router();
 
-supplyRoute.post('/', authHandler([ADMIN, SALES_MANAGER]), createSupply);
+supplyRoute.post('/', authHandler([ADMIN, SALES_ADMIN]), createSupply);
 supplyRoute.put('/status', authHandler([ADMIN]), updateSupplyStatus);
-supplyRoute.get('/', authHandler([ADMIN, SALES_MANAGER]), getSupplyByDate);
+supplyRoute.get('/', authHandler([ADMIN, SALES_ADMIN]), getSupplyByDate);
 supplyRoute.get('/credit', authHandler([ADMIN]), getCreditSuppliesByDate);
-supplyRoute.get('/:supplyId', authHandler([ADMIN, SALES_MANAGER]), getSupplyById);
+supplyRoute.get('/:supplyId', authHandler([ADMIN, SALES_ADMIN]), getSupplyById);
 
 module.exports = supplyRoute;

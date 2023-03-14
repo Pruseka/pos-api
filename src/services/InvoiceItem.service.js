@@ -52,6 +52,34 @@ const getInvoiceItemsToDateByUserId = async (toDate, userId) => {
     });
 }
 
+const getInvoiceItemsToDateAndExcludedUserIds = async (toDate, userIds) => {
+    const query = "CASE \
+        WHEN type = 'cash' THEN qty \
+        WHEN type = 'credit' THEN qty \
+        WHEN type = 'return' THEN qty * -1 \
+        WHEN type = 'cancel' THEN 0 \
+        WHEN type = 'damage' THEN qty \
+        ELSE 0 \
+    END";
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await InvoiceItem.findAll({
+        where: {
+            createdAt: {
+                [Op.lt]: temp
+            },
+            createdBy: {
+                [Op.notIn]: userIds,
+            },
+        },
+        attributes: [
+            'itemId',
+            [fn('sum', literal(query)), 'qty'],
+        ],
+        group: ['itemId']
+    });
+}
+
 const getInvoiceItemsByDateAndUserId = async (fromDate, toDate, userId) => {
     const temp = new Date(toDate);
     temp.setDate(temp.getDate() + 1);
@@ -84,10 +112,45 @@ const getInvoiceItemsByDateAndUserId = async (fromDate, toDate, userId) => {
     });
 }
 
+const getInvoiceItemsByDateAndExcludedUserIds = async (fromDate, toDate, userIds) => {
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await InvoiceItem.findAll({
+        where: {
+            createdAt: {
+                [Op.gte]: fromDate,
+                [Op.lt]: temp,
+            },
+        },
+        include: [
+            {
+                model: Invoice,
+                where: {
+                    createdBy: {
+                        [Op.notIn]: userIds
+                    }
+                },
+                attributes: ['customer']
+            },
+            {
+                model: Item,
+                attributes: ['code', 'name'],
+                include: [
+                    {
+                        model: Category,
+                        attributes: ['name']
+                    }
+                ]
+            }
+        ],
+    });
+}
 
 module.exports = Object.freeze({
     addAllInvoiceItems,
     getInvoiceItemsToDate,
     getInvoiceItemsToDateByUserId,
+    getInvoiceItemsToDateAndExcludedUserIds,
     getInvoiceItemsByDateAndUserId,
+    getInvoiceItemsByDateAndExcludedUserIds,
 })

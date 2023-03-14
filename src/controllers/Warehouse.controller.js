@@ -1,13 +1,15 @@
 const SupplyItemService = require("../services/SupplyItem.service");
-const TransferItemService = require('../services/TransferItem.service')
+const TransferItemService = require('../services/TransferItem.service');
+const InvoiceItemService = require("../services/InvoiceItem.service");
 const ItemService = require("../services/Item.service.js");
+const UserService = require("../services/User.service");
 
 const WarehouseValidator = require("../validators/Warehouse.validator");
 
 const {
     successRes
 } = require("../utils/response.utils.js");
-const { CASH, CREDIT, RETURN, CANCEL, TO } = require("../configs/constant.config");
+const { CASH, CREDIT, RETURN, TO } = require("../configs/constant.config");
 
 const createItemMap = (items) => {
     const itemMap = new Map();
@@ -28,17 +30,22 @@ const getClosingToDate = async (req, res, next) => {
         const _items = await ItemService.getAllItems();
         const supplyItems = await SupplyItemService.getSupplyItemsToDate(toDate);
         const transferItems = await TransferItemService.getTransferItemsToDate(toDate);
+        const vanSalesIds = await UserService.getAllVanSales().map(vanSale => vanSale.userId);
+        const invoiceItems = await InvoiceItemService.getInvoiceItemsToDateAndExcludedUserIds(toDate, vanSalesIds);
         const transferItemMap = createItemMap(transferItems);
         const supplyItemMap = createItemMap(supplyItems);
+        const invoiceItemMap = createItemMap(invoiceItems);
         const items = _items.map(item => {
-            const transferQty = transferItemMap.get(item.itemId) ?? 0;
-            const supplyQty = supplyItemMap.get(item.itemId) ?? 0;
+            const itemId = item.itemId;
+            const transferQty = transferItemMap.get(itemId) ?? 0;
+            const supplyQty = supplyItemMap.get(itemId) ?? 0;
+            const invoiceQty = invoiceItemMap.get(itemId) ?? 0;
             return {
                 itemId: item.itemId,
                 code: item.code,
                 name: item.name,
                 category: item.Category.name,
-                qty: supplyQty - transferQty
+                qty: supplyQty - transferQty - invoiceQty
             };
         });
         successRes(res, null, items);
@@ -57,7 +64,7 @@ const getQtyFromSupply = (type, qty) => {
     return 0;
 }
 
-const getInRecordByDate = async (req, res, next) => {
+const getSupplyRecordByDate = async (req, res, next) => {
     try {
         const validation = WarehouseValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
@@ -104,13 +111,13 @@ const getInRecordByDate = async (req, res, next) => {
 }
 
 const getQtyFromTransfer = (type, qty) => {
-    if(type === TO) {
+    if (type === TO) {
         return -1 * qty;
     }
     return qty;
 }
 
-const getOutRecordByDate = async (req, res, next) => {
+const getTransferRecordByDate = async (req, res, next) => {
     try {
         const validation = WarehouseValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
@@ -157,8 +164,56 @@ const getOutRecordByDate = async (req, res, next) => {
     }
 }
 
+const getInvoiceRecordByDate = async (req, res, next) => {
+    try {
+        const validation = WarehouseValidator.getByDateValidator.validate(req.query);
+        if (validation.error) {
+            throw validation.error;
+        }
+        const { from, to } = validation.value;
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        const vanSalesIds = await UserService.getAllVanSales().map(vanSale => vanSale.userId);
+        const _invoiceItems = await InvoiceItemService.getInvoiceItemsByDateAndExcludedUserIds(fromDate, toDate, vanSalesIds);
+        const invoiceItems = _invoiceItems.map(_invoiceItem => {
+            const { Invoice, Item, price, amount, ...invoiceItem } = _invoiceItem.get({ plain: true });
+            return {
+                customer: Invoice.customer,
+                code: Item.code,
+                name: Item.name,
+                category: Item.Category.name,
+                ...invoiceItem
+            }
+        });
+        const outRecordMap = new Map();
+        invoiceItems.forEach(_invoiceItem => {
+            const { itemId, code, name, category, ...invoiceItem } = _invoiceItem;
+            const qty = getQtyFromInvoice(invoiceItem.type, invoiceItem.qty);
+            const outRecord = outRecordMap.get(itemId);
+            if (!outRecord) {
+                outRecordMap.set(itemId, {
+                    itemId,
+                    code,
+                    name,
+                    category,
+                    qty,
+                    list: [invoiceItem],
+                })
+            } else {
+                outRecord.qty += qty;
+                outRecord.list.push(invoiceItem);
+            }
+        });
+        const outRecords = Array.from(outRecordMap.values());
+        successRes(res, null, outRecords);
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = Object.freeze({
     getClosingToDate,
-    getInRecordByDate,
-    getOutRecordByDate,
+    getSupplyRecordByDate,
+    getTransferRecordByDate,
+    getInvoiceRecordByDate,
 })

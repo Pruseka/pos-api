@@ -33,8 +33,10 @@ module.exports = Object.freeze({
     INTERNAL_SERVER_ERROR: 'Internal server error',
     UNAUTHORIZED_ERROR: 'Unauthorized access',
     FORBIDDEN_ERROR: 'Access Denied',
+
     INVALID_EMAIL_OR_PASSWORD: 'Invalid email or password',
     INVALID_APP_SECRET: 'Invalid app secret',
+    ONLY_VAN_SALES_ALLOW: 'Only van sales are allowed',
 
     CATEGORY_NOT_EXIST: 'Category doesn\'t exist',
     USER_NOT_EXIST: 'User doesn\'t exist',

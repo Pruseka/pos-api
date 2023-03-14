@@ -3,10 +3,11 @@ const InvoiceItemService = require("../services/InvoiceItem.service");
 const UserService = require('../services/User.service');
 const ItemService = require("../services/Item.service.js");
 
-const StockValidator = require("../validators/Stock.validator.js");
+const VanStockValidator = require("../validators/VanStock.validator");
 
 const {
     USER_NOT_EXIST,
+    ONLY_VAN_SALES_ALLOW,
 } = require('../configs/message.config');
 
 const {
@@ -18,7 +19,13 @@ const {
 } = require("../utils/response.utils.js");
 
 const {
-    BadRequestError, TO, CASH, CREDIT, DAMAGE, RETURN
+    BadRequestError,
+    TO,
+    CASH,
+    CREDIT,
+    DAMAGE,
+    RETURN,
+    VAN_SALES
 } = require('../configs/constant.config');
 
 const createItemMap = (items) => {
@@ -31,7 +38,7 @@ const createItemMap = (items) => {
 
 const getClosingToDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getToDateValidator.validate(req.query);
+        const validation = VanStockValidator.getToDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         };
@@ -39,6 +46,9 @@ const getClosingToDate = async (req, res, next) => {
         const user = await UserService.getUserById(userId);
         if (!user) {
             throw createError(BadRequestError, USER_NOT_EXIST);
+        }
+        if(user.role !== VAN_SALES) {
+            throw createError(BadRequestError, ONLY_VAN_SALES_ALLOW);
         }
         const toDate = new Date(to);
         const _items = await ItemService.getAllItems();
@@ -70,9 +80,9 @@ const getQtyFromTransfer = (type, qty) => {
     return qty * -1;
 }
 
-const getInRecordByDate = async (req, res, next) => {
+const getTransferRecordByDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getByDateValidator.validate(req.query);
+        const validation = VanStockValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         }
@@ -80,6 +90,9 @@ const getInRecordByDate = async (req, res, next) => {
         const user = await UserService.getUserById(userId);
         if (!user) {
             throw createError(BadRequestError, USER_NOT_EXIST);
+        }
+        if(user.role !== VAN_SALES) {
+            throw createError(BadRequestError, ONLY_VAN_SALES_ALLOW);
         }
         const fromDate = new Date(from);
         const toDate = new Date(to);
@@ -130,9 +143,9 @@ const getQtyFromInvoice = (type, qty) => {
     return 0;
 }
 
-const getOutRecordByDate = async (req, res, next) => {
+const getInvoiceRecordByDate = async (req, res, next) => {
     try {
-        const validation = StockValidator.getByDateValidator.validate(req.query);
+        const validation = VanStockValidator.getByDateValidator.validate(req.query);
         if (validation.error) {
             throw validation.error;
         }
@@ -143,15 +156,18 @@ const getOutRecordByDate = async (req, res, next) => {
         if (!user) {
             throw createError(BadRequestError, USER_NOT_EXIST);
         }
+        if(user.role !== VAN_SALES) {
+            throw createError(BadRequestError, ONLY_VAN_SALES_ALLOW);
+        }
         const _invoiceItems = await InvoiceItemService.getInvoiceItemsByDateAndUserId(fromDate, toDate, userId);
         const invoiceItems = _invoiceItems.map(_invoiceItem => {
-            const { Invoice, Item, price, amount, ...transferItem } = _invoiceItem.get({ plain: true });
+            const { Invoice, Item, price, amount, ...invoiceItem } = _invoiceItem.get({ plain: true });
             return {
                 customer: Invoice.customer,
                 code: Item.code,
                 name: Item.name,
                 category: Item.Category.name,
-                ...transferItem
+                ...invoiceItem
             }
         });
         const outRecordMap = new Map();
@@ -182,6 +198,6 @@ const getOutRecordByDate = async (req, res, next) => {
 
 module.exports = Object.freeze({
     getClosingToDate,
-    getInRecordByDate,
-    getOutRecordByDate,
+    getTransferRecordByDate,
+    getInvoiceRecordByDate,
 })

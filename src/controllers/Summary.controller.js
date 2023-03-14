@@ -1,9 +1,4 @@
-const BaseSubscriptionService = require("../services/BaseSubscription.service.js");
-const ClassSubscriptionService = require("../services/ClassSubscription.service.js");
-const TrainerSubpscriptionService = require("../services/TrainerSubscription.service.js");
-const InvoiceService = require("../services/Invoice.service.js");
-const SupplyService = require("../services/Supply.service.js");
-const ExpenseService = require("../services/Expense.service.js");
+
 
 const SummaryValidator = require("../validators/Summary.validator.js");
 

@@ -15,7 +15,7 @@ module.exports = Object.freeze({
     
     ADMIN: 'Admin',
     VAN_SALES: 'Van Sales',
-    SALES_MANAGER: 'Sales Manager',
+    SALES_ADMIN: 'Sales Admin',
 
     RETAIL: 'retail',
     WHOLESALES: 'wholesales',

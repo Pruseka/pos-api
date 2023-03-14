@@ -127,9 +127,9 @@ const getAllVanSales = async (_, res, next) => {
     }
 }
 
-const getAllSalesManagers = async (_, res, next) => {
+const getAllSalesAdmins = async (_, res, next) => {
     try {
-        const _users = await UserService.getAllSalesManagers();
+        const _users = await UserService.getAllSalesAdmins();
         const users = _users.map(_user => {
             const { password, createdAt, updatedAt, ...user } = _user.get({ plain: true });
             return user;
@@ -148,5 +148,5 @@ module.exports = Object.freeze({
     updatePassword,
     getAllUsers,
     getAllVanSales,
-    getAllSalesManagers,
+    getAllSalesAdmins,
 })

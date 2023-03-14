@@ -27,7 +27,7 @@ const userRoute = require('./src/routes/User.route');
 
 const {
     ADMIN,
-    SALES_MANAGER,
+    SALES_ADMIN,
     VAN_SALES,
 } = require('./src/configs/constant.config.js');
 
@@ -41,17 +41,17 @@ app.use(express.json());
 app.use('/api/add/admin', addAdminRoute);
 app.use('/api/login', loginRoute);
 
-app.use('/api/category', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), categoryRoute);
-app.use('/api/customer', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), customerRoute);
-app.use('/api/customer_stock', authHandler([ADMIN, SALES_MANAGER]), customerStockRoute);
-app.use('/api/customer_transfer', authHandler([ADMIN, SALES_MANAGER]), customerTransferRoute);
+app.use('/api/category', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), categoryRoute);
+app.use('/api/customer', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), customerRoute);
+app.use('/api/customer_stock', authHandler([ADMIN, SALES_ADMIN]), customerStockRoute);
+app.use('/api/customer_transfer', authHandler([ADMIN, SALES_ADMIN]), customerTransferRoute);
 app.use('/api/expense', authHandler([ADMIN]), expenseRoute);
-app.use('/api/invoice', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), invoiceRoute);
-app.use('/api/supplier', authHandler([ADMIN, SALES_MANAGER]), supplierRoute);
-app.use('/api/transfer', authHandler([ADMIN, SALES_MANAGER]), transferRoute);
+app.use('/api/invoice', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), invoiceRoute);
+app.use('/api/supplier', authHandler([ADMIN, SALES_ADMIN]), supplierRoute);
+app.use('/api/transfer', authHandler([ADMIN, SALES_ADMIN]), transferRoute);
 app.use('/api/user', authHandler([ADMIN]), userRoute);
-app.use('/api/van_stock', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), stockRoute);
-app.use('/api/warehouse', authHandler([ADMIN, SALES_MANAGER]), warehouseRoute);
+app.use('/api/van_stock', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), stockRoute);
+app.use('/api/warehouse', authHandler([ADMIN, SALES_ADMIN]), warehouseRoute);
 
 app.use('/api/item', itemRoute);
 app.use('/api/supply', supplyRoute);

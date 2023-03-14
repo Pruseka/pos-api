@@ -5,14 +5,14 @@ const {
     updateUser,
     updatePassword,
     getAllUsers,
-    getAllSalesManagers,
+    getAllSalesAdmins,
     getAllVanSales,
 } = require("../controllers/User.controller");
 
 const userRoute = Router();
 
 userRoute.get('/all', getAllUsers);
-userRoute.get('/sales_managers', getAllSalesManagers);
+userRoute.get('/SALES_ADMINs', getAllSalesAdmins);
 userRoute.get('/van_sales', getAllVanSales);
 userRoute.post('/', addUser);
 userRoute.put('/', updateUser);

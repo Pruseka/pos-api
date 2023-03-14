@@ -27,7 +27,8 @@ const userRoute = require('./src/routes/User.route');
 
 const {
     ADMIN,
-    SALESMAN,
+    SALES_MANAGER,
+    VAN_SALES,
 } = require('./src/configs/constant.config.js');
 
 const app = express();
@@ -40,21 +41,21 @@ app.use(express.json());
 app.use('/api/add/admin', addAdminRoute);
 app.use('/api/login', loginRoute);
 
-app.use('/api/category', authHandler([ADMIN, SALESMAN]), categoryRoute);
-app.use('/api/customer', authHandler([ADMIN, SALESMAN]), customerRoute);
-app.use('/api/supplier', authHandler([ADMIN, SALESMAN]), supplierRoute);
-app.use('/api/invoice', authHandler([ADMIN, SALESMAN]), invoiceRoute);
-app.use('/api/supply', authHandler([ADMIN, SALESMAN]), supplyRoute);
-app.use('/api/transfer', authHandler([ADMIN, SALESMAN]), transferRoute);
-app.use('/api/customer_transfer', authHandler([ADMIN, SALESMAN]), customerTransferRoute);
-app.use('/api/warehouse', authHandler([ADMIN, SALESMAN]), warehouseRoute);
-app.use('/api/stock', authHandler([ADMIN, SALESMAN]), stockRoute);
-app.use('/api/customer_stock', authHandler([ADMIN, SALESMAN]), customerStockRoute);
-app.use('/api/user', authHandler([ADMIN]), userRoute);
-
+app.use('/api/category', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), categoryRoute);
+app.use('/api/customer', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), customerRoute);
+app.use('/api/customer_stock', authHandler([ADMIN, SALES_MANAGER]), customerStockRoute);
+app.use('/api/customer_transfer', authHandler([ADMIN, SALES_MANAGER]), customerTransferRoute);
 app.use('/api/expense', authHandler([ADMIN]), expenseRoute);
+app.use('/api/invoice', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), invoiceRoute);
+app.use('/api/supplier', authHandler([ADMIN, SALES_MANAGER]), supplierRoute);
+app.use('/api/transfer', authHandler([ADMIN, SALES_MANAGER]), transferRoute);
+app.use('/api/user', authHandler([ADMIN]), userRoute);
+app.use('/api/van_stock', authHandler([ADMIN, SALES_MANAGER, VAN_SALES]), stockRoute);
+app.use('/api/warehouse', authHandler([ADMIN, SALES_MANAGER]), warehouseRoute);
 
 app.use('/api/item', itemRoute);
+app.use('/api/supply', supplyRoute);
+
 
 
 app.use(errorHandler);

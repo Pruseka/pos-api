@@ -1,4 +1,5 @@
 const { Router } = require("express");
+
 const {
     getAllItems,
     createItem,
@@ -10,14 +11,15 @@ const authHandler = require('../middlewares/Auth.middleware');
 
 const {
     ADMIN,
-    SALESMAN,
+    VAN_SALES,
+    SALES_MANAGER,
 } = require('../configs/constant.config');
 
 const itemRoute = Router();
 
-itemRoute.get('/all', authHandler([ADMIN, SALESMAN]), getAllItems);
-itemRoute.post('/', authHandler([ADMIN, SALESMAN]), createItem);
-itemRoute.put('/', authHandler([ADMIN, SALESMAN]), updateItem);
+itemRoute.get('/all', authHandler([ADMIN, VAN_SALES, SALES_MANAGER]), getAllItems);
+itemRoute.post('/', authHandler([ADMIN, SALES_MANAGER]), createItem);
+itemRoute.put('/', authHandler([ADMIN, SALES_MANAGER]), updateItem);
 itemRoute.put('/price', authHandler([ADMIN]), updateItemPrice);
 
 module.exports = itemRoute;

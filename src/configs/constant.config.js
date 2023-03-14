@@ -13,8 +13,9 @@ module.exports = Object.freeze({
     APP_SECRET: 'app_secret',
     SALT_ROUND: 10,
     
-    ADMIN: 'admin',
-    SALESMAN: 'salesman',
+    ADMIN: 'Admin',
+    VAN_SALES: 'Van Sales',
+    SALES_MANAGER: 'Sales Manager',
 
     RETAIL: 'retail',
     WHOLESALES: 'wholesales',

@@ -19,7 +19,6 @@ const {
 } = require('../utils/error.utils');
 
 const {
-    ADMIN,
     BadRequestError,
 } = require("../configs/constant.config.js");
 

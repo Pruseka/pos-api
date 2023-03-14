@@ -24,8 +24,8 @@ const {
     CREDIT,
     UNPAID,
     PAID,
-    ADMIN,
     BadRequestError,
+    VAN_SALES,
 } = require("../configs/constant.config.js");
 
 const createItemMap = (items) => {
@@ -129,8 +129,8 @@ const getInvoiceByDate = async (req, res, next) => {
                 amount,
             }
         });
-        const salesmanInvoices = invoices.filter(invoice => invoice.createdBy === req.user.userId);
-        successRes(res, null, req.user.role === ADMIN ? invoices : salesmanInvoices);
+        const vansalesInvoices = invoices.filter(invoice => invoice.createdBy === req.user.userId);
+        successRes(res, null, req.user.role === VAN_SALES ? vansalesInvoices : invoices);
     } catch (err) {
         next(err);
     }

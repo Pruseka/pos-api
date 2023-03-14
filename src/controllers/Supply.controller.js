@@ -107,7 +107,7 @@ const getSupplyByDate = async (req, res, next) => {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const _supplies = await SupplyService.getSuppliesByDate(fromDate, toDate);
-        const supplies = _supplies.map(_supply => {
+        const adminSupplies = _supplies.map(_supply => {
             const { createdAt, supplyId, CreatedBy, supplier, type, amount } = _supply.get({ plain: true });
             return {
                 createdAt,
@@ -118,10 +118,10 @@ const getSupplyByDate = async (req, res, next) => {
                 amount
             }
         });
-        const salesmanSupplies = supplies
+        const supplies = adminSupplies
             .filter(supply => supply.createdBy === req.user.userId)
             .map(({ amount, ...supply }) => supply);
-        successRes(res, null, req.user.role === ADMIN ? supplies : salesmanSupplies);
+        successRes(res, null, req.user.role === ADMIN ? adminSupplies : supplies);
     } catch (err) {
         next(err);
     }
@@ -137,7 +137,7 @@ const getCreditSuppliesByDate = async (req, res, next) => {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         const _creditSupplies = await SupplyService.getCreditSuppliesByDate(fromDate, toDate);
-        const supplies = _creditSupplies.map(_supply => {
+        const creditSupplies = _creditSupplies.map(_supply => {
             const { supplyId, supplier, status, amount, CreatedBy, createdAt, WithdrawnBy, withdrawnAt } = _supply.get({ plain: true });
             return {
                 supplyId,
@@ -150,10 +150,7 @@ const getCreditSuppliesByDate = async (req, res, next) => {
                 withdrawnAt,
             }
         });
-        const salesmanSupplies = supplies
-            .filter(supply => supply.createdBy === req.user.userId)
-            .map(({ amount, ...supply }) => supply);
-        successRes(res, null, req.user.role === ADMIN ? supplies : salesmanSupplies);
+        successRes(res, null, creditSupplies);
     } catch (err) {
         next(err);
     }
@@ -187,7 +184,7 @@ const getSupplyById = async (req, res, next) => {
         const _supply = await SupplyService.getSupplyById(supplyId);
         if (!_supply) createError(BadRequestError, SUPPLY_NOT_EXIST);
         const { supplier, type, amount, CreatedBy, SupplyItems } = _supply.get({ plain: true });
-        const items = SupplyItems.map(item => {
+        const adminItems = SupplyItems.map(item => {
             const { itemId, qty, price, amount, Item } = item;
             return {
                 itemId,
@@ -199,21 +196,21 @@ const getSupplyById = async (req, res, next) => {
                 amount,
             }
         });
-        const salesmanItems = items.map(({ amount, ...item }) => item);
-        const supply = {
+        const items = adminItems.map(({ amount, ...item }) => item);
+        const adminSupply = {
             supplier,
             type,
             amount,
             createdBy: CreatedBy.name,
-            items
+            items: adminItems,
         }
-        const salesmanSupply = {
+        const supply = {
             supplier,
             type,
             createdBy: CreatedBy.name,
-            items: salesmanItems,
+            items,
         }
-        successRes(res, null, req.user.role === ADMIN ? supply : salesmanSupply);
+        successRes(res, null, req.user.role === ADMIN ? adminSupply : supply);
     } catch (err) {
         next(err);
     }

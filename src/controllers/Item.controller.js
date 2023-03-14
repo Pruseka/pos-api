@@ -74,7 +74,7 @@ const updateItemPrice = async (req, res, next) => {
 const getAllItems = async (req, res, next) => {
     try {
         const _items = await ItemService.getAllItems();
-        const items = _items.map(_item => {
+        const adminItems = _items.map(_item => {
             const {
                 Category, categoryId,
                 ...item
@@ -84,14 +84,14 @@ const getAllItems = async (req, res, next) => {
                 ...item,
             }
         })
-        const salesmanItem = items.map(_item => {
+        const items = adminItems.map(_item => {
             const {
                 purchasingPrice,
                 ...item
             } = _item;
             return item;
         });
-        successRes(res, null, req.user.role === ADMIN ? items : salesmanItem);
+        successRes(res, null, req.user.role === ADMIN ? adminItems : items);
     } catch (err) {
         next(err);
     }

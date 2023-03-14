@@ -14,7 +14,6 @@ const {
 
 const {
     ADMIN,
-    SALESMAN,
     APP_SECRET,
     BadRequestError,
     SALT_ROUND,
@@ -57,13 +56,12 @@ const addUser = async (req, res, next) => {
         if (validation.error) {
             throw validation.error;
         }
-        const user = validation.value;
+        const { password, ...user } = validation.value;
         const salt = bcrypt.genSaltSync(SALT_ROUND);
-        const password = bcrypt.hashSync(user.password, salt);
+        const hashPassword = bcrypt.hashSync(password, salt);
         await UserService.createUser({
             ...user,
-            password,
-            role: SALESMAN,
+            password: hashPassword,
         });
         successRes(res, ADD_USER_SUCCESS);
     } catch (err) {
@@ -85,10 +83,10 @@ const updateUser = async (req, res, next) => {
     }
 }
 
-const updatePassword = async(req, res, next) => {
+const updatePassword = async (req, res, next) => {
     try {
         const validation = UserValidator.updatePasswordValidator.validate(req.body);
-        if(validation.error) {
+        if (validation.error) {
             throw validation.error;
         }
         const { userId, password } = validation.value;
@@ -98,7 +96,7 @@ const updatePassword = async(req, res, next) => {
             password: hashPassword
         });
         successRes(res, UPDATE_PASSWORD_SUCCESS);
-    } catch(err) {
+    } catch (err) {
         next(err);
     }
 }
@@ -116,6 +114,32 @@ const getAllUsers = async (_, res, next) => {
     }
 }
 
+const getAllVanSales = async (_, res, next) => {
+    try {
+        const _users = await UserService.getAllVanSales();
+        const users = _users.map(_user => {
+            const { password, createdAt, updatedAt, ...user } = _user.get({ plain: true });
+            return user;
+        });
+        successRes(res, null, users);
+    } catch (err) {
+        next(err);
+    }
+}
+
+const getAllSalesManagers = async (_, res, next) => {
+    try {
+        const _users = await UserService.getAllSalesManagers();
+        const users = _users.map(_user => {
+            const { password, createdAt, updatedAt, ...user } = _user.get({ plain: true });
+            return user;
+        });
+        successRes(res, null, users);
+    } catch (err) {
+        next(err);
+    }
+}
+
 
 module.exports = Object.freeze({
     addAdmin,
@@ -123,4 +147,6 @@ module.exports = Object.freeze({
     updateUser,
     updatePassword,
     getAllUsers,
+    getAllVanSales,
+    getAllSalesManagers,
 })

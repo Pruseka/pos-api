@@ -19,7 +19,6 @@ const {
 } = require('../utils/error.utils');
 
 const {
-    ADMIN,
     BadRequestError,
 } = require("../configs/constant.config.js");
 
@@ -112,8 +111,7 @@ const getTransferByDate = async (req, res, next) => {
                 items,
             }
         });
-        const salesmanTransfers = transfers.filter(transfer => transfer.userId === req.user.userId);
-        successRes(res, null, req.user.role === ADMIN ? transfers : salesmanTransfers);
+        successRes(res, null, transfers);
     } catch (err) {
         next(err);
     }

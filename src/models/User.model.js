@@ -3,7 +3,8 @@ const { DataTypes } = require('sequelize');
 
 const {
     ADMIN,
-    SALESMAN,
+    SALES_MANAGER,
+    VAN_SALES,
 } = require('../configs/constant.config');
 
 const User = db.define('User', {
@@ -29,9 +30,9 @@ const User = db.define('User', {
     },
     role: {
         type: DataTypes.ENUM({
-            values: [SALESMAN, ADMIN]
+            values: [ADMIN, SALES_MANAGER, VAN_SALES]
         }),
-        defaultValue: SALESMAN,
+        defaultValue: SALES_MANAGER,
     },
     enable: {
         type: DataTypes.BOOLEAN,

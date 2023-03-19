@@ -22,7 +22,7 @@ const transferRoute = require('./src/routes/Transfer.route');
 const customerTransferRoute = require('./src/routes/CustomerTransfer.route');
 const customerStockRoute = require('./src/routes/CustomerStock.route.js');
 const warehouseRoute = require('./src/routes/Warehouse.route');
-const stockRoute = require('./src/routes/Stock.route');
+const vanStockRoute = require('./src/routes/VanStock.route');
 const userRoute = require('./src/routes/User.route');
 
 const {
@@ -50,7 +50,7 @@ app.use('/api/invoice', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), invoiceRou
 app.use('/api/supplier', authHandler([ADMIN, SALES_ADMIN]), supplierRoute);
 app.use('/api/transfer', authHandler([ADMIN, SALES_ADMIN]), transferRoute);
 app.use('/api/user', authHandler([ADMIN]), userRoute);
-app.use('/api/van_stock', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), stockRoute);
+app.use('/api/van_stock', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), vanStockRoute);
 app.use('/api/warehouse', authHandler([ADMIN, SALES_ADMIN]), warehouseRoute);
 
 app.use('/api/item', itemRoute);

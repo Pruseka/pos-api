@@ -12,7 +12,7 @@ const {
 const userRoute = Router();
 
 userRoute.get('/all', getAllUsers);
-userRoute.get('/SALES_ADMINs', getAllSalesAdmins);
+userRoute.get('/sales_admin', getAllSalesAdmins);
 userRoute.get('/van_sales', getAllVanSales);
 userRoute.post('/', addUser);
 userRoute.put('/', updateUser);

@@ -30,7 +30,7 @@ const getClosingToDate = async (req, res, next) => {
         const _items = await ItemService.getAllItems();
         const supplyItems = await SupplyItemService.getSupplyItemsToDate(toDate);
         const transferItems = await TransferItemService.getTransferItemsToDate(toDate);
-        const vanSalesIds = await UserService.getAllVanSales().map(vanSale => vanSale.userId);
+        const vanSalesIds = (await UserService.getAllVanSales()).map(vanSale => vanSale.userId);
         const invoiceItems = await InvoiceItemService.getInvoiceItemsToDateAndExcludedUserIds(toDate, vanSalesIds);
         const transferItemMap = createItemMap(transferItems);
         const supplyItemMap = createItemMap(supplyItems);
@@ -173,7 +173,7 @@ const getInvoiceRecordByDate = async (req, res, next) => {
         const { from, to } = validation.value;
         const fromDate = new Date(from);
         const toDate = new Date(to);
-        const vanSalesIds = await UserService.getAllVanSales().map(vanSale => vanSale.userId);
+        const vanSalesIds = (await UserService.getAllVanSales()).map(vanSale => vanSale.userId);
         const _invoiceItems = await InvoiceItemService.getInvoiceItemsByDateAndExcludedUserIds(fromDate, toDate, vanSalesIds);
         const invoiceItems = _invoiceItems.map(_invoiceItem => {
             const { Invoice, Item, price, amount, ...invoiceItem } = _invoiceItem.get({ plain: true });

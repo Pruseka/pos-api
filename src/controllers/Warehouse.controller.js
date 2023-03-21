@@ -164,6 +164,16 @@ const getTransferRecordByDate = async (req, res, next) => {
     }
 }
 
+const getQtyFromInvoice = (type, qty) => {
+    if (type === CASH || type === CREDIT || type === DAMAGE) {
+        return qty;
+    }
+    if (type === RETURN) {
+        return qty * -1;
+    }
+    return 0;
+}
+
 const getInvoiceRecordByDate = async (req, res, next) => {
     try {
         const validation = WarehouseValidator.getByDateValidator.validate(req.query);

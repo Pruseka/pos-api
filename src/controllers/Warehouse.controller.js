@@ -9,7 +9,7 @@ const WarehouseValidator = require("../validators/Warehouse.validator");
 const {
     successRes
 } = require("../utils/response.utils.js");
-const { CASH, CREDIT, RETURN, TO } = require("../configs/constant.config");
+const { CASH, CREDIT, RETURN, FROM } = require("../configs/constant.config");
 
 const createItemMap = (items) => {
     const itemMap = new Map();
@@ -111,7 +111,7 @@ const getSupplyRecordByDate = async (req, res, next) => {
 }
 
 const getQtyFromTransfer = (type, qty) => {
-    if (type === TO) {
+    if (type === FROM) {
         return -1 * qty;
     }
     return qty;

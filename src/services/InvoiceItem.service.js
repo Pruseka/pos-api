@@ -28,11 +28,11 @@ const getInvoiceItemsToDate = async (toDate) => {
 
 const getInvoiceItemsToDateByUserId = async (toDate, userId) => {
     const query = "CASE \
-        WHEN type = 'cash' THEN qty \
-        WHEN type = 'credit' THEN qty \
-        WHEN type = 'return' THEN qty * -1 \
-        WHEN type = 'cancel' THEN 0 \
-        WHEN type = 'damage' THEN qty \
+        WHEN InvoiceItem.type = 'cash' THEN qty \
+        WHEN InvoiceItem.type = 'credit' THEN qty \
+        WHEN InvoiceItem.type = 'return' THEN qty * -1 \
+        WHEN InvoiceItem.type = 'cancel' THEN 0 \
+        WHEN InvoiceItem.type = 'damage' THEN qty \
         ELSE 0 \
     END";
     const temp = new Date(toDate);
@@ -42,8 +42,15 @@ const getInvoiceItemsToDateByUserId = async (toDate, userId) => {
             createdAt: {
                 [Op.lt]: temp
             },
-            createdBy: userId,
         },
+        include: [
+            {
+                model: Invoice,
+                where: {
+                    createdBy: userId
+                }
+            }
+        ],
         attributes: [
             'itemId',
             [fn('sum', literal(query)), 'qty'],

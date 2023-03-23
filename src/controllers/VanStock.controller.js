@@ -53,7 +53,7 @@ const getClosingToDate = async (req, res, next) => {
         const toDate = new Date(to);
         const _items = await ItemService.getAllItems();
         const tranferItems = await TransferItemService.getTransferItemsToDateByUserId(toDate, userId);
-        const invoiceItems = await InvoiceItemService.getInvoiceItemsToDate(toDate);
+        const invoiceItems = await InvoiceItemService.getInvoiceItemsToDateByUserId(toDate, userId);
         const transferItemMap = createItemMap(tranferItems);
         const invoiceItemMap = createItemMap(invoiceItems);
         const items = _items.map(item => {

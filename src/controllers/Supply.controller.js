@@ -119,7 +119,6 @@ const getSupplyByDate = async (req, res, next) => {
             }
         });
         const supplies = adminSupplies
-            .filter(supply => supply.createdBy === req.user.userId)
             .map(({ amount, ...supply }) => supply);
         successRes(res, null, req.user.role === ADMIN ? adminSupplies : supplies);
     } catch (err) {

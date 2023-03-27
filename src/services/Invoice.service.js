@@ -55,21 +55,6 @@ const getInvoicesByDate = async (fromDate, toDate) => {
             }
         },
         include: [
-            // {
-            //     model: InvoiceItem,
-            //     include: [
-            //         {
-            //             model: Item,
-            //             attributes: ['code', 'name'],
-            //             include: [
-            //                 {
-            //                     model: Category,
-            //                     attributes: ['name']
-            //                 }
-            //             ]
-            //         },
-            //     ]
-            // },
             {
                 model: User,
                 as: 'CreatedBy',
@@ -116,10 +101,18 @@ const getCreditInvoicesByDate = async (fromDate, toDate) => {
     })
 }
 
-const getTotalAmountByDate = async (fromDate, toDate) => {
+const getAmountByDate = async (fromDate, toDate) => {
+    const query = "CASE \
+        WHEN type = 'cash' THEN amount \
+        WHEN type = 'credit' THEN amount \
+        WHEN type = 'return' THEN amount * -1 \
+        WHEN type = 'cancel' THEN 0 \
+        WHEN type = 'damage' THEN 0 \
+        ELSE 0 \
+    END";
     const temp = new Date(toDate);
     temp.setDate(temp.getDate() + 1);
-    const totalAmount = await Invoice.findAll({
+    const amount = await Invoice.findAll({
         where: {
             createdAt: {
                 [Op.gte]: fromDate,
@@ -127,10 +120,43 @@ const getTotalAmountByDate = async (fromDate, toDate) => {
             }
         },
         attributes: [
-            [fn('sum', literal(`CASE WHEN type = 'cash' THEN totalAmount WHEN type = 'return' THEN totalAmount * -1 ELSE 0 END`)), 'totalAmount'],
+            [fn('sum', literal(query)), 'amount'],
         ]
     });
-    return totalAmount[0].get({ plain: true });
+    if (amount.length < 1) {
+        return 0;
+    }
+    const totalAmount = amount[0].get({ plain: true });
+    return totalAmount.amount ? totalAmount.amount : 0;
+}
+
+const getCashInByDate = async (fromDate, toDate) => {
+    const query = "CASE \
+        WHEN type = 'cash' THEN amount \
+        WHEN type = 'credit' THEN amount \
+        WHEN type = 'return' THEN amount * -1 \
+        WHEN type = 'cancel' THEN 0 \
+        WHEN type = 'damage' THEN 0 \
+        ELSE 0 \
+    END";
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    const amount = await Invoice.findAll({
+        where: {
+            receivedAt: {
+                [Op.gte]: fromDate,
+                [Op.lt]: temp
+            }
+        },
+        attributes: [
+            [fn('sum', literal(query)), 'amount'],
+        ]
+    });
+    if (amount.length < 1) {
+        return 0;
+    }
+    const totalAmount = amount[0].get({ plain: true });
+    return totalAmount.amount ? totalAmount.amount : 0;
 }
 
 module.exports = Object.freeze({
@@ -139,5 +165,6 @@ module.exports = Object.freeze({
     getInvoiceById,
     getInvoicesByDate,
     getCreditInvoicesByDate,
-    getTotalAmountByDate,
+    getAmountByDate,
+    getCashInByDate,
 })

@@ -6,7 +6,7 @@ const createExpense = async (expense) => {
     await Expense.create(expense);
 }
 
-const updateExpense = async(expenseId, expense) => {
+const updateExpense = async (expenseId, expense) => {
     await Expense.update(expense, {
         where: { expenseId }
     })
@@ -25,10 +25,10 @@ const getExpensesByDate = async (fromDate, toDate) => {
     })
 }
 
-const getTotalAmountByDate = async (fromDate, toDate) => {
+const getAmountByDate = async (fromDate, toDate) => {
     const temp = new Date(toDate);
     temp.setDate(temp.getDate() + 1);
-    const totalAmount = await Expense.findAll({
+    const amount = await Expense.findAll({
         where: {
             createdAt: {
                 [Op.gte]: fromDate,
@@ -36,15 +36,19 @@ const getTotalAmountByDate = async (fromDate, toDate) => {
             }
         },
         attributes: [
-            [fn('sum', 'amount'), 'totalAmount'],
+            [fn('sum', 'amount'), 'amount'],
         ]
     });
-    return totalAmount[0].get({ plain: true });
+    if (amount.length < 1) {
+        return 0;
+    }
+    const totalAmount = amount[0].get({ plain: true });
+    return totalAmount.amount ? totalAmount.amount : 0;
 }
 
 module.exports = Object.freeze({
     createExpense,
     updateExpense,
     getExpensesByDate,
-    getTotalAmountByDate,
+    getAmountByDate,
 })

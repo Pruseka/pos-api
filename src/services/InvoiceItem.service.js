@@ -10,6 +10,14 @@ const addAllInvoiceItems = async (invoiceItems) => {
 }
 
 const getInvoiceItemsToDate = async (toDate) => {
+    const query = "CASE \
+        WHEN type = 'cash' THEN qty \
+        WHEN type = 'credit' THEN qty \
+        WHEN type = 'return' THEN qty * -1 \
+        WHEN type = 'cancel' THEN 0 \
+        WHEN type = 'damage' THEN qty \
+        ELSE 0 \
+    END";
     const temp = new Date(toDate);
     temp.setDate(temp.getDate() + 1);
     return await InvoiceItem.findAll({
@@ -20,7 +28,7 @@ const getInvoiceItemsToDate = async (toDate) => {
         },
         attributes: [
             'itemId',
-            [fn('sum', literal(`CASE WHEN type = 'cash' THEN qty WHEN type = 'return' THEN qty * -1 ELSE 0 END`)), 'qty'],
+            [fn('sum', literal(query)), 'qty'],
         ],
         group: ['itemId']
     });

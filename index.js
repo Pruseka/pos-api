@@ -18,6 +18,7 @@ const expenseRoute = require('./src/routes/Expense.route.js');
 const itemRoute = require('./src/routes/Item.route.js');
 const invoiceRoute = require('./src/routes/Invoice.route');
 const supplyRoute = require('./src/routes/Supply.route.js');
+const summaryRoute = require('./src/routes/Summary.route');
 const transferRoute = require('./src/routes/Transfer.route');
 const customerTransferRoute = require('./src/routes/CustomerTransfer.route');
 const customerStockRoute = require('./src/routes/CustomerStock.route.js');
@@ -48,14 +49,14 @@ app.use('/api/customer_transfer', authHandler([ADMIN, SALES_ADMIN]), customerTra
 app.use('/api/expense', authHandler([ADMIN]), expenseRoute);
 app.use('/api/invoice', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), invoiceRoute);
 app.use('/api/supplier', authHandler([ADMIN, SALES_ADMIN]), supplierRoute);
+app.use('/api/summary', authHandler([ADMIN]), summaryRoute);
 app.use('/api/transfer', authHandler([ADMIN, SALES_ADMIN]), transferRoute);
-app.use('/api/user', authHandler([ADMIN]), userRoute);
 app.use('/api/van_stock', authHandler([ADMIN, SALES_ADMIN, VAN_SALES]), vanStockRoute);
 app.use('/api/warehouse', authHandler([ADMIN, SALES_ADMIN]), warehouseRoute);
 
 app.use('/api/item', itemRoute);
 app.use('/api/supply', supplyRoute);
-
+app.use('/api/user', userRoute);
 
 
 app.use(errorHandler);

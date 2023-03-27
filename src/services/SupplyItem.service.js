@@ -1,4 +1,4 @@
-const { fn, Op, literal } = require("sequelize");
+const { fn, Op, literal, col } = require("sequelize");
 
 const Supply = require("../models/Supply.model.js");
 const Item = require('../models/Item.model');
@@ -26,7 +26,7 @@ const getSupplyItemsByDate = async (fromDate, toDate) => {
             },
             {
                 model: Item,
-                attributes: ['code','name'],
+                attributes: ['code', 'name'],
                 include: [
                     {
                         model: Category,
@@ -62,8 +62,27 @@ const getSupplyItemsToDate = async (toDate) => {
     });
 }
 
+const getPurchasingPriceToDate = async (toDate) => {
+    const temp = new Date(toDate);
+    temp.setDate(temp.getDate() + 1);
+    return await SupplyItem.findAll({
+        where: {
+            createdAt: {
+                [Op.lt]: temp
+            },
+        },
+        attributes: [
+            'itemId',
+            'price',
+            fn('max', col('createdAt'), 'createdAt'),
+        ],
+        group: ['itemId']
+    })
+}
+
 module.exports = Object.freeze({
     addAllSupplyItems,
     getSupplyItemsByDate,
     getSupplyItemsToDate,
+    getPurchasingPriceToDate,
 });

@@ -91,7 +91,9 @@ const createSupply = async (req, res, next) => {
             ...supplyItem
         }));
         await SupplyItemService.addAllSupplyItems(supplyItems);
-        successRes(res, ADD_SUPPLY_SUCCESS);
+        successRes(res, ADD_SUPPLY_SUCCESS, {
+            supplyId: supply.supplyId
+        });
     } catch (err) {
         next(err);
     }
@@ -167,7 +169,7 @@ const updateSupplyStatus = async (req, res, next) => {
             withdrawnBy: req.user.userId,
             withdrawnAt: new Date()
         });
-        successRes(res, null, PAID_SUPPLY_SUCCESS);
+        successRes(res, PAID_SUPPLY_SUCCESS);
     } catch (err) {
         next(err);
     }
@@ -195,7 +197,7 @@ const getSupplyById = async (req, res, next) => {
                 amount,
             }
         });
-        const items = adminItems.map(({ amount, ...item }) => item);
+        const items = adminItems.map(({ price, amount, ...item }) => item);
         const adminSupply = {
             supplier,
             type,

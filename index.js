@@ -39,6 +39,10 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+//ui route
+app.use(express.static('build'))
+
+//no auth route
 app.use('/api/add/admin', addAdminRoute);
 app.use('/api/login', loginRoute);
 

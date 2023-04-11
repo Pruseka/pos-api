@@ -100,7 +100,9 @@ const createInvoice = async (req, res, next) => {
             ...invoiceItem
         }));
         await InvoiceItemService.addAllInvoiceItems(invoiceItems);
-        successRes(res, ADD_INVOICE_SUCCESS);
+        successRes(res, ADD_INVOICE_SUCCESS, {
+            invoiceId: invoice.invoiceId
+        });
     } catch (err) {
         next(err);
     }
@@ -154,7 +156,9 @@ const getCreditInvoicesByDate = async (req, res, next) => {
                 receivedBy: ReceivedBy ? ReceivedBy.name : null,
             }
         })
-        successRes(res, null, creditInvoices);
+        const vansalesInvoices = creditInvoices.filter(invoice => invoice.createdBy === req.user.userId);
+        successRes(res, null, req.user.role === VAN_SALES ? vansalesInvoices : creditInvoices);
+        // successRes(res, null, creditInvoices);
     } catch (err) {
         next(err);
     }
@@ -172,7 +176,7 @@ const updateInvoiceStatus = async (req, res, next) => {
             receivedBy: req.user.userId,
             receivedAt: new Date()
         });
-        successRes(res, null, PAID_INVOICE_SUCCESS);
+        successRes(res, PAID_INVOICE_SUCCESS);
     } catch (err) {
         next(err);
     }

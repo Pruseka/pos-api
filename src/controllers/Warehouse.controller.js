@@ -9,7 +9,7 @@ const WarehouseValidator = require("../validators/Warehouse.validator");
 const {
     successRes
 } = require("../utils/response.utils.js");
-const { CASH, CREDIT, RETURN, FROM } = require("../configs/constant.config");
+const { CASH, CREDIT, RETURN, FROM, DAMAGE } = require("../configs/constant.config");
 
 const createItemMap = (items) => {
     const itemMap = new Map();

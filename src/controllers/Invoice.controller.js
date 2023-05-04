@@ -125,13 +125,14 @@ const getInvoiceByDate = async (req, res, next) => {
                 createdAt,
                 invoiceId,
                 createdBy: CreatedBy.name,
+                userId: CreatedBy.userId,
                 customer,
                 customerType,
                 type,
                 amount,
             }
         });
-        const vansalesInvoices = invoices.filter(invoice => invoice.createdBy === req.user.userId);
+        const vansalesInvoices = invoices.filter(invoice => invoice.userId === req.user.userId);
         successRes(res, null, req.user.role === VAN_SALES ? vansalesInvoices : invoices);
     } catch (err) {
         next(err);

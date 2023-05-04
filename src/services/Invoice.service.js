@@ -58,7 +58,7 @@ const getInvoicesByDate = async (fromDate, toDate) => {
             {
                 model: User,
                 as: 'CreatedBy',
-                attributes: ['name']
+                attributes: ['userId', 'name']
             }
         ]
     })
